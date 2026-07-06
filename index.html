@@ -8,9 +8,15 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Pirates of Perdition</title>
+  <title>Pirates of Perdition | Lasqueti Water Taxi</title>
 
   <style>
+
+    * {
+
+      box-sizing: border-box;
+
+    }
 
     body {
 
@@ -18,23 +24,77 @@
 
       font-family: Arial, sans-serif;
 
-      background-color: #050505;
+      background: #050505;
 
-      color: white;
+      color: #f5f1e8;
 
       line-height: 1.6;
 
     }
 
+    a {
+
+      color: inherit;
+
+    }
+
+    header {
+
+      position: fixed;
+
+      top: 0;
+
+      width: 100%;
+
+      z-index: 10;
+
+      padding: 18px 30px;
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      background: rgba(0,0,0,0.65);
+
+      backdrop-filter: blur(8px);
+
+      border-bottom: 1px solid rgba(212,180,106,0.25);
+
+    }
+
+    .logo {
+
+      font-weight: bold;
+
+      letter-spacing: 2px;
+
+      color: #d4b46a;
+
+    }
+
+    nav a {
+
+      margin-left: 20px;
+
+      text-decoration: none;
+
+      font-size: 0.9rem;
+
+      color: #ddd;
+
+    }
+
     .hero {
 
-      height: 100vh;
+      min-height: 100vh;
 
       background:
 
-        linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)),
+        linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.88)),
 
-        url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e');
+        url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee');
 
       background-size: cover;
 
@@ -44,31 +104,51 @@
 
       align-items: center;
 
-      justify-content: center;
-
-      text-align: center;
-
-      padding: 20px;
+      padding: 120px 30px 60px;
 
     }
 
-    .hero-content h1 {
+    .hero-content {
 
-      font-size: 4rem;
+      max-width: 850px;
 
-      margin-bottom: 10px;
+    }
+
+    .eyebrow {
+
+      color: #d4b46a;
+
+      text-transform: uppercase;
 
       letter-spacing: 3px;
 
+      font-size: 0.9rem;
+
+      margin-bottom: 12px;
+
     }
 
-    .hero-content p {
+    h1 {
 
-      font-size: 1.4rem;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+
+      line-height: 0.95;
+
+      margin: 0 0 20px;
+
+      letter-spacing: 2px;
+
+    }
+
+    .hero p {
+
+      max-width: 640px;
+
+      font-size: 1.25rem;
+
+      color: #ddd;
 
       margin-bottom: 30px;
-
-      color: #d4b46a;
 
     }
 
@@ -76,9 +156,9 @@
 
       display: inline-block;
 
-      padding: 14px 28px;
+      padding: 14px 24px;
 
-      margin: 10px;
+      margin: 8px 8px 8px 0;
 
       border: 2px solid #d4b46a;
 
@@ -86,23 +166,27 @@
 
       text-decoration: none;
 
-      transition: 0.3s;
+      font-weight: bold;
+
+      text-transform: uppercase;
+
+      letter-spacing: 1px;
 
     }
 
-    .button:hover {
+    .button.primary {
 
       background: #d4b46a;
 
-      color: black;
+      color: #050505;
 
     }
 
     section {
 
-      padding: 80px 20px;
+      padding: 85px 30px;
 
-      max-width: 1000px;
+      max-width: 1100px;
 
       margin: auto;
 
@@ -110,29 +194,109 @@
 
     h2 {
 
+      font-size: 2.4rem;
+
       color: #d4b46a;
 
-      margin-bottom: 20px;
+      margin-bottom: 16px;
 
     }
 
-    .services {
+    .intro {
+
+      font-size: 1.15rem;
+
+      max-width: 780px;
+
+      color: #ccc;
+
+    }
+
+    .grid {
 
       display: grid;
 
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 
-      gap: 20px;
+      gap: 22px;
+
+      margin-top: 35px;
 
     }
 
     .card {
 
-      border: 1px solid #333;
+      background: linear-gradient(180deg, #111, #080808);
 
-      padding: 20px;
+      border: 1px solid rgba(212,180,106,0.25);
 
-      background: #111;
+      padding: 26px;
+
+      min-height: 210px;
+
+    }
+
+    .card h3 {
+
+      color: #f5f1e8;
+
+      margin-top: 0;
+
+      font-size: 1.35rem;
+
+    }
+
+    .card p {
+
+      color: #bbb;
+
+    }
+
+    .banner {
+
+      max-width: none;
+
+      background:
+
+        linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)),
+
+        url('https://images.unsplash.com/photo-1439405326854-014607f694d7');
+
+      background-size: cover;
+
+      background-position: center;
+
+      text-align: center;
+
+      border-top: 1px solid rgba(212,180,106,0.25);
+
+      border-bottom: 1px solid rgba(212,180,106,0.25);
+
+    }
+
+    .note {
+
+      border-left: 4px solid #d4b46a;
+
+      padding-left: 20px;
+
+      color: #ddd;
+
+      font-size: 1.1rem;
+
+      margin-top: 30px;
+
+    }
+
+    .contact-box {
+
+      background: #0d0d0d;
+
+      border: 1px solid rgba(212,180,106,0.35);
+
+      padding: 30px;
+
+      margin-top: 30px;
 
     }
 
@@ -142,9 +306,33 @@
 
       padding: 40px 20px;
 
+      color: #888;
+
       border-top: 1px solid #222;
 
-      color: #777;
+    }
+
+    @media (max-width: 700px) {
+
+      header {
+
+        display: block;
+
+      }
+
+      nav {
+
+        margin-top: 8px;
+
+      }
+
+      nav a {
+
+        margin: 0 12px 0 0;
+
+        font-size: 0.8rem;
+
+      }
 
     }
 
@@ -154,95 +342,173 @@
 
 <body>
 
-  <div class="hero">
+<header>
 
-    <div class="hero-content">
+  <div class="logo">PIRATES OF PERDITION</div>
 
-      <h1>PIRATES OF PERDITION</h1>
+  <nav>
 
-      <p>Lasqueti ↔ French Creek</p>
+    <a href="#services">Services</a>
 
-      <a href="tel:2509440484" class="button">Call Now</a>
+    <a href="#weather">Weather</a>
 
-      <a href="https://facebook.com" class="button">Facebook</a>
+    <a href="#about">About</a>
+
+    <a href="#contact">Book</a>
+
+  </nav>
+
+</header>
+
+<div class="hero">
+
+  <div class="hero-content">
+
+    <div class="eyebrow">Lasqueti Island ↔ French Creek</div>
+
+    <h1>WATER TAXI<br>WITH TEETH.</h1>
+
+    <p>
+
+      Independent coastal passage between Lasqueti and Vancouver Island.
+
+      Local captain. Small boat. Big water. Weather respected.
+
+    </p>
+
+    <a href="tel:2509440484" class="button primary">Call / Text 250-944-0484</a>
+
+    <a href="#contact" class="button">Book Passage</a>
+
+  </div>
+
+</div>
+
+<section id="services">
+
+  <h2>Passage & Charter Services</h2>
+
+  <p class="intro">
+
+    Pirates of Perdition offers fair-weather water taxi service and private charter runs
+
+    between Lasqueti Island, French Creek, and surrounding coastal routes.
+
+  </p>
+
+  <div class="grid">
+
+    <div class="card">
+
+      <h3>Passenger Crossings</h3>
+
+      <p>Direct crossings between Lasqueti Island and French Creek for small groups.</p>
+
+    </div>
+
+    <div class="card">
+
+      <h3>Private Charter</h3>
+
+      <p>Custom runs, flexible timing, and local transport when conditions allow.</p>
+
+    </div>
+
+    <div class="card">
+
+      <h3>Light Cargo</h3>
+
+      <p>Small supplies, gear, and essentials moved across the water by arrangement.</p>
+
+    </div>
+
+    <div class="card">
+
+      <h3>Local Captain</h3>
+
+      <p>Operated by Captain Nick with island knowledge and respect for the Strait.</p>
 
     </div>
 
   </div>
 
-  <section>
+</section>
 
-    <h2>Water Taxi Services</h2>
+<section class="banner" id="weather">
 
-    <div class="services">
+  <h2>The Sea Gets a Vote</h2>
 
-      <div class="card">
+  <p class="intro" style="margin:auto;">
 
-        <h3>Passenger Crossings</h3>
+    Crossings are weather-dependent. Wind, sea state, visibility, load, and timing all matter.
 
-        <p>Reliable local crossings between Lasqueti Island and French Creek.</p>
+    Safety comes before schedule.
 
-      </div>
+  </p>
 
-      <div class="card">
+</section>
 
-        <h3>Private Charter</h3>
+<section id="about">
 
-        <p>Custom trips and flexible scheduling based on conditions.</p>
+  <h2>About Pirates of Perdition</h2>
 
-      </div>
+  <p class="intro">
 
-      <div class="card">
+    Built on Lasqueti grit, rough-water ambition, and a healthy fear of the sea,
 
-        <h3>Local Captain</h3>
+    Pirates of Perdition is more than a ride across the Strait. It is the beginning
 
-        <p>Experienced coastal navigation through the Strait of Georgia.</p>
+    of a coastal adventure brand — practical now, legendary later.
 
-      </div>
+  </p>
 
-    </div>
+  <p class="note">
 
-  </section>
+    Today: reliable local water taxi service when conditions are right.
 
-  <section>
+    Tomorrow: a bigger boat, rough-water adventure, GoPro footage, stories,
 
-    <h2>About</h2>
+    storms, and the kind of crossings people remember.
 
-    <p>
+  </p>
 
-      Pirates of Perdition is an independent coastal water taxi service
+</section>
 
-      operating between Lasqueti Island and French Creek.
+<section id="contact">
 
-      Built around local knowledge, seamanship, and respect for the sea.
+  <h2>Book a Crossing</h2>
 
-    </p>
+  <p class="intro">
 
-  </section>
+    Text or call with your route, number of passengers, preferred time, and cargo details.
 
-  <section>
+    Final confirmation depends on marine conditions.
 
-    <h2>Contact</h2>
+  </p>
 
-    <p>
+  <div class="contact-box">
 
-      Phone: 250-944-0484
+    <p><strong>Phone:</strong> <a href="tel:2509440484">250-944-0484</a></p>
 
-    </p>
+    <p><strong>Route:</strong> Lasqueti Island ↔ French Creek</p>
 
-    <p>
+    <p><strong>Capacity:</strong> Small passenger groups by arrangement</p>
 
-      Serving Lasqueti Island & surrounding coastal routes.
+    <p><strong>Captain:</strong> Nick</p>
 
-    </p>
+    <a href="sms:2509440484" class="button primary">Text Captain Nick</a>
 
-  </section>
+    <a href="tel:2509440484" class="button">Call Now</a>
 
-  <footer>
+  </div>
 
-    © Pirates of Perdition
+</section>
 
-  </footer>
+<footer>
+
+  © Pirates of Perdition — Lasqueti Water Taxi
+
+</footer>
 
 </body>
 
