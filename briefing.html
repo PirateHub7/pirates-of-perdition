@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta
+    name="description"
+    content="Daily marine and crossing briefing for Lasqueti Island and French Creek."
+  />
+
+  <title>Captain's Morning Briefing | Pirates of Perdition</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .briefing-page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    .briefing-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .briefing-header h1 {
+      margin-bottom: 8px;
+    }
+
+    .briefing-date {
+      opacity: 0.8;
+      font-size: 1rem;
+    }
+
+    .briefing-card {
+      background: rgba(0, 0, 0, 0.78);
+      border: 1px solid rgba(212, 175, 55, 0.7);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .briefing-card h2 {
+      margin-top: 0;
+      color: #d4af37;
+    }
+
+    .condition-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 15px;
+    }
+
+    .condition-item {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 16px;
+      border-radius: 8px;
+    }
+
+    .condition-label {
+      display: block;
+      font-size: 0.85rem;
+      opacity: 0.75;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .condition-value {
+      font-size: 1.15rem;
+      font-weight: bold;
+    }
+
+    .status-banner {
+      padding: 18px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.15rem;
+      margin-bottom: 20px;
+    }
+
+    .status-good {
+      background: rgba(31, 122, 75, 0.85);
+    }
+
+    .status-caution {
+      background: rgba(173, 113, 20, 0.9);
+    }
+
+    .status-poor {
+      background: rgba(145, 35, 35, 0.9);
+    }
+
+    .briefing-notes {
+      white-space: pre-line;
+      line-height: 1.7;
+    }
+
+    .briefing-disclaimer {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      opacity: 0.8;
+      border-left: 3px solid #d4af37;
+      padding-left: 15px;
+    }
+
+    .briefing-updated {
+      text-align: center;
+      margin-top: 20px;
+      opacity: 0.7;
+      font-size: 0.9rem;
+    }
+
+    .briefing-error {
+      background: rgba(145, 35, 35, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="briefing.html">Morning Briefing</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main class="briefing-page">
+    <section class="briefing-header">
+      <h1>Captain's Morning Briefing</h1>
+      <p>
+        Marine conditions and operational outlook for the
+        Lasqueti Island–French Creek route.
+      </p>
+    </section>
+
+    <div id="briefing-content">
+      <p>Loading today's briefing...</p>
+    </div>
+  </main>
+
+  <script src="briefing-data.js"></script>
+  <script>
+    function getStatusClass(status) {
+      const normalizedStatus = status.toLowerCase();
+
+      if (
+        normalizedStatus.includes("favourable") ||
+        normalizedStatus.includes("good")
+      ) {
+        return "status-good";
+      }
+
+      if (
+        normalizedStatus.includes("poor") ||
+        normalizedStatus.includes("cancel") ||
+        normalizedStatus.includes("not recommended")
+      ) {
+        return "status-poor";
+      }
+
+      return "status-caution";
+    }
+
+    function displayBriefing() {
+      const container = document.getElementById("briefing-content");
+
+      if (typeof briefingData === "undefined") {
+        container.innerHTML = `
+          <div class="briefing-error">
+            The morning briefing is temporarily unavailable.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="status-banner ${getStatusClass(briefingData.status)}">
+          ${briefingData.status}
+        </div>
+
+        <section class="briefing-card">
+          <h2>${briefingData.date}</h2>
+
+          <div class="condition-grid">
+            <div class="condition-item">
+              <span class="condition-label">Wind</span>
+              <span class="condition-value">${briefingData.wind}</span>
+            </div>
+
+            <div class="condition-item">
+              <span class="condition-label">Sea State</span>
+              <span class="condition-value">${briefingData.seaState}</span>
+            </div>
+
+            <div class="condition-item">
+              <span class="condition-label">Visibility</span>
+              <span class="condition-value">${briefingData.visibility}</span>
+            </div>
+
+            <div class="condition-item">
+              <span class="condition-label">Weather</span>
+              <span class="condition-value">${briefingData.weather}</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="briefing-card">
+          <h2>Recommended Crossing Window</h2>
+          <p>${briefingData.crossingWindow}</p>
+        </section>
+
+        <section class="briefing-card">
+          <h2>Captain's Assessment</h2>
+          <div class="briefing-notes">${briefingData.captainsNotes}</div>
+        </section>
+
+        <section class="briefing-card">
+          <h2>Forecast Trend</h2>
+          <div class="briefing-notes">${briefingData.forecastTrend}</div>
+        </section>
+
+        <section class="briefing-card briefing-disclaimer">
+          This briefing is provided for general information only. Marine
+          conditions can change rapidly and may differ from forecast conditions.
+          All Pirates of Perdition crossings remain entirely at the captain's
+          discretion following an assessment of wind, sea state, visibility,
+          vessel loading and other operational factors.
+        </section>
+
+        <p class="briefing-updated">
+          Last updated: ${briefingData.lastUpdated}
+        </p>
+      `;
+    }
+
+    displayBriefing();
+  </script>
+</body>
+</html>
