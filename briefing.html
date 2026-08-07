@@ -1,82 +1,203 @@
-<section class="briefing-construction">
+<!DOCTYPE html>
+<html lang="en">
 
-  <div class="briefing-construction-card">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <div class="eyebrow">CAPTAIN'S MORNING BRIEFING</div>
+  <title>Captain's Morning Briefing | Pirates of Perdition</title>
 
-    <h1>Under Construction</h1>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-    <p class="briefing-lead">
-      Need the latest word on the Strait of Georgia crossing?
-    </p>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #050505;
+      color: #f5f1e8;
+      line-height: 1.6;
+    }
 
-    <p>
-      In the future, this page will pull together marine forecasts,
-      current conditions and comparative weather data to build a useful
-      AI-assisted morning briefing for the Lasqueti Island ↔ French Creek route.
-    </p>
+    header {
+      background: #050505;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+      padding: 18px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-    <p>
-      For now, this fucker is still in the shipyard.
-    </p>
+    .logo {
+      color: #d4af37;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
 
-    <p class="briefing-warning">
-      Do not use this page for current crossing decisions.
-      Official marine forecasts and real-world conditions always take priority.
-    </p>
+    nav a {
+      color: #f5f1e8;
+      text-decoration: none;
+      margin-left: 24px;
+      font-size: 0.95rem;
+    }
 
-    <a href="index.html" class="button primary">
-      Return to Home Port
-    </a>
+    nav a:hover {
+      color: #d4af37;
+    }
 
-  </div>
+    .briefing-construction {
+      min-height: calc(100vh - 70px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 25px;
 
-</section>
-
-.briefing-construction {
-    min-height: calc(100vh - 80px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 25px;
-    background:
-        linear-gradient(rgba(0,0,0,.72), rgba(0,0,0,.85)),
+      background:
+        linear-gradient(rgba(0,0,0,.72), rgba(0,0,0,.88)),
         url("48EDDEC4-3B16-45E4-95C8-398A72CA5DDD.png");
-    background-size: cover;
-    background-position: center;
-}
 
-.briefing-construction-card {
-    max-width: 850px;
-    padding: 50px 45px;
-    text-align: center;
-    background: rgba(10,10,10,.9);
-    border: 1px solid rgba(212,175,55,.45);
-    border-radius: 14px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.55);
-}
+      background-size: cover;
+      background-position: center;
+    }
 
-.briefing-construction-card h1 {
-    font-size: clamp(3rem, 7vw, 6rem);
-    margin: 10px 0 25px;
-}
+    .briefing-card {
+      width: min(900px, 100%);
+      padding: 55px 45px;
+      text-align: center;
+      background: rgba(10,10,10,.9);
+      border: 1px solid rgba(212,175,55,.45);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.55);
+    }
 
-.briefing-lead {
-    color: #d4af37;
-    font-size: 1.35rem;
-    font-weight: bold;
-}
+    .eyebrow {
+      color: #d4af37;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
 
-.briefing-construction-card p {
-    max-width: 700px;
-    margin: 18px auto;
-    line-height: 1.8;
-}
+    h1 {
+      font-size: clamp(3rem, 7vw, 6rem);
+      line-height: 0.95;
+      margin: 0 0 28px;
+    }
 
-.briefing-warning {
-    margin-top: 30px !important;
-    padding: 18px;
-    border: 1px solid rgba(212,175,55,.35);
-    color: #ddd;
-    background: rgba(255,255,255,.03);
-}
+    .lead {
+      color: #d4af37;
+      font-size: 1.35rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .briefing-card p {
+      max-width: 720px;
+      margin: 18px auto;
+    }
+
+    .shipyard-line {
+      font-size: 1.15rem;
+      font-weight: bold;
+      margin-top: 28px;
+    }
+
+    .warning {
+      margin-top: 32px;
+      padding: 18px 20px;
+      border: 1px solid rgba(212,175,55,.35);
+      background: rgba(255,255,255,.03);
+      color: #ddd;
+      border-radius: 10px;
+    }
+
+    .button {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 14px 24px;
+      background: #d4af37;
+      color: #050505;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+
+    .button:hover {
+      opacity: 0.9;
+    }
+
+    @media (max-width: 700px) {
+      header {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      nav a {
+        margin: 0 8px;
+      }
+
+      .briefing-card {
+        padding: 40px 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">PIRATES OF PERDITION</div>
+
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="index.html#services">Services</a>
+      <a href="index.html#weather">Weather</a>
+      <a href="index.html#contact">Book</a>
+    </nav>
+  </header>
+
+  <main class="briefing-construction">
+
+    <section class="briefing-card">
+
+      <div class="eyebrow">Captain's Morning Briefing</div>
+
+      <h1>UNDER CONSTRUCTION</h1>
+
+      <p class="lead">
+        Need the latest word on the Strait of Georgia crossing?
+      </p>
+
+      <p>
+        In the future, this page will compare marine forecasts,
+        current conditions and route-specific weather data to build
+        an AI-assisted morning briefing for the Lasqueti Island ↔ French Creek crossing.
+      </p>
+
+      <p>
+        The goal is simple: one clear morning briefing that helps make sense
+        of the weather, the sea state and what the crossing may look like that day.
+      </p>
+
+      <p class="shipyard-line">
+        For now, this fucker is still in the shipyard.
+      </p>
+
+      <div class="warning">
+        This page is not currently providing live marine guidance.
+        Do not use it for crossing decisions.
+        Official forecasts, observed conditions and the captain's judgment
+        always take priority.
+      </div>
+
+      <a href="index.html" class="button">
+        Return to Home Port
+      </a>
+
+    </section>
+
+  </main>
+
+</body>
+</html>
