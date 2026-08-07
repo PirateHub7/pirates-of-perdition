@@ -141,7 +141,89 @@
     font-size: 1.1rem;
     line-height: 1.8;
 }
+.vessel-section {
+    background: #101010;
+    padding: 90px 30px;
+    border-top: 1px solid rgba(212,175,55,.15);
+    border-bottom: 1px solid rgba(212,175,55,.15);
+}
 
+.vessel-heading {
+    max-width: 850px;
+    margin: 0 auto 50px;
+    text-align: center;
+}
+
+.vessel-heading h2 {
+    font-size: clamp(2.4rem, 5vw, 4.5rem);
+    margin: 10px 0 15px;
+}
+
+.vessel-tagline {
+    color: #d4af37;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+.vessel-grid {
+    max-width: 1150px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 45px;
+    align-items: center;
+}
+
+.vessel-photo img {
+    width: 100%;
+    display: block;
+    border: 1px solid rgba(212,175,55,.35);
+    box-shadow: 0 18px 45px rgba(0,0,0,.5);
+}
+
+.vessel-details {
+    color: #d0d0d0;
+}
+
+.vessel-block {
+    padding: 0 0 28px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.vessel-block span {
+    display: block;
+    color: #d4af37;
+    font-size: .8rem;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.vessel-block h3 {
+    margin: 0 0 12px;
+    font-size: 1.6rem;
+    color: #f5f1e8;
+}
+
+.vessel-block p {
+    margin: 0;
+    line-height: 1.8;
+}
+
+.vessel-philosophy div {
+    padding: 7px 0;
+    font-weight: 600;
+}
+
+@media (max-width: 800px) {
+    .vessel-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vessel-section {
+        padding: 70px 20px;
+    }
+}
     .construction-banner {
     background: rgba(155, 28, 28, 0.95);
     border: 2px solid #d4af37;
@@ -456,6 +538,65 @@
     Every crossing is conducted at the captain's discretion,
     with safety, professionalism, and respect for the sea.
   </p>
+
+</section>
+  <section id="vessel" class="vessel-section">
+
+  <div class="vessel-heading">
+    <div class="eyebrow">THE VESSEL</div>
+    <h2>Meet the Double Eagle</h2>
+
+    <p class="vessel-tagline">
+      Small boat. Big water. Every crossing assessed individually.
+    </p>
+  </div>
+
+  <div class="vessel-grid">
+
+    <div class="vessel-photo">
+      <img src="DE1.JPG"
+           alt="Pirates of Perdition Double Eagle water taxi underway">
+    </div>
+
+    <div class="vessel-details">
+
+      <div class="vessel-block">
+        <span>VESSEL</span>
+        <h3>1979 Double Eagle</h3>
+
+        <p>
+          The Double Eagle is the heart of Pirates of Perdition.
+          Compact, capable and well suited to the Lasqueti Island
+          and French Creek crossing, she is operated with passenger
+          comfort, safety and respect for the sea placed ahead of speed.
+        </p>
+      </div>
+
+      <div class="vessel-block">
+        <span>POWER</span>
+        <h3>Mercury SeaPro 60 HP Command Thrust</h3>
+
+        <p>
+          Commercial-duty power, strong low-speed control and responsive
+          handling provide dependable performance for regular coastal
+          passenger service.
+        </p>
+      </div>
+
+      <div class="vessel-block">
+        <span>OPERATING PHILOSOPHY</span>
+
+        <div class="vessel-philosophy">
+          <div>Weather respected.</div>
+          <div>Captain's discretion.</div>
+          <div>Safety before schedule.</div>
+          <div>Every crossing assessed individually.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
 
 </section>
 <section id="services">
