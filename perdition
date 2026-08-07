@@ -1,0 +1,190 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What Is Perdition? | Pirates of Perdition</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        linear-gradient(rgba(8, 10, 12, 0.82), rgba(8, 10, 12, 0.92)),
+        url("images/ocean-background.jpg") center/cover fixed;
+      color: #f3ead7;
+      line-height: 1.7;
+    }
+
+    .perdition-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      box-sizing: border-box;
+    }
+
+    .perdition-card {
+      max-width: 900px;
+      width: 100%;
+      background: rgba(15, 17, 18, 0.88);
+      border: 1px solid rgba(200, 163, 78, 0.55);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
+      padding: 55px 45px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      font-size: 0.85rem;
+      color: #c8a34e;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #f5e8c8;
+    }
+
+    .definition {
+      max-width: 700px;
+      margin: 30px auto;
+      font-size: 1.2rem;
+      color: #d8d0c0;
+    }
+
+    .definition strong {
+      color: #c8a34e;
+    }
+
+    .divider {
+      width: 100px;
+      height: 1px;
+      background: #c8a34e;
+      margin: 40px auto;
+    }
+
+    h2 {
+      font-size: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #f5e8c8;
+      margin-bottom: 20px;
+    }
+
+    p {
+      max-width: 720px;
+      margin: 0 auto 22px;
+      font-size: 1.1rem;
+    }
+
+    .closing-line {
+      margin-top: 45px;
+      font-size: clamp(1.5rem, 4vw, 2.3rem);
+      font-weight: bold;
+      color: #c8a34e;
+      line-height: 1.4;
+    }
+
+    .home-link {
+      display: inline-block;
+      margin-top: 45px;
+      padding: 12px 24px;
+      border: 1px solid #c8a34e;
+      color: #f3ead7;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.85rem;
+      transition: 0.25s ease;
+    }
+
+    .home-link:hover {
+      background: #c8a34e;
+      color: #111;
+    }
+
+    @media (max-width: 650px) {
+      .perdition-page {
+        padding: 25px 12px;
+      }
+
+      .perdition-card {
+        padding: 40px 22px;
+      }
+
+      p,
+      .definition {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="perdition-page">
+
+    <section class="perdition-card">
+
+      <div class="eyebrow">Pirates of Perdition</div>
+
+      <h1>What Is Perdition?</h1>
+
+      <div class="definition">
+        <strong>Perdition</strong> — a state of ruin, destruction,
+        or being forever lost.
+      </div>
+
+      <p>
+        An old word with a dark meaning, <strong>perdition</strong>
+        speaks of the place beyond safety — where the familiar world
+        ends and uncertainty begins.
+      </p>
+
+      <p>
+        For sailors, that boundary has always been the sea.
+      </p>
+
+      <div class="divider"></div>
+
+      <h2>Why Pirates of Perdition?</h2>
+
+      <p>
+        Because we sail where land ends.
+      </p>
+
+      <p>
+        The Strait of Georgia can be beautiful, calm and welcoming —
+        and it can quickly remind you who is really in command.
+        Wind, waves, current and weather have ruled these waters
+        far longer than any captain.
+      </p>
+
+      <p>
+        <strong>Pirates of Perdition</strong> is a nod to the old
+        seafaring idea of venturing beyond the safety of shore
+        and into the unknown.
+      </p>
+
+      <div class="closing-line">
+        We aren't pirates headed for perdition.<br />
+        We're the pirates who know the way through it.
+      </div>
+
+      <a href="index.html" class="home-link">Return to Port</a>
+
+    </section>
+
+  </main>
+
+</body>
+</html>
+```
