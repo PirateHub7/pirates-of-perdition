@@ -152,54 +152,41 @@ async function getHRDPSPoint(location) {
 
   return {
 
-    location:
-      location.name,
+  location:
+    location.name,
 
-    available: true,
+  available:
+    true,
 
-    modelRunTime:
-      referenceTime,
+  modelRunTime:
+    referenceTime,
 
-    forecastFor:
-      forecastTime,
+  forecastFor:
+    forecastTime,
 
-    wind: {
+  wind: {
 
-      speedKnots:
-        msToKnots(
-          windSpeed.value
-        ),
+    speedKnots:
+      msToKnots(
+        windSpeed.value
+      ),
 
-      directionDegrees:
-        windDirection.value,
+    directionDegrees:
+      windDirection.value,
 
-      directionCardinal:
-        degreesToCardinal(
-          windDirection.value
-        ),
+    directionCardinal:
+      degreesToCardinal(
+        windDirection.value
+      ),
 
-      gustKnots:
-        msToKnots(
-          gust.value
-        )
+    gustKnots:
+      gust.value !== null
+        ? msToKnots(gust.value)
+        : null
 
-    },
+  }
 
-
-    debug: {
-
-      windSpeed:
-        windSpeed,
-
-      windDirection:
-        windDirection,
-
-      gust:
-        gust
-
-    }
-
-  };
+};
 
 }
 
