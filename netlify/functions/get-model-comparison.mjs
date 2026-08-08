@@ -3,7 +3,6 @@ export default async () => {
   try {
 
     const locations = {
-
       sistersIslets: {
         name: "Sisters Islets",
         latitude: 49.49,
@@ -15,23 +14,18 @@ export default async () => {
         latitude: 49.35,
         longitude: -124.16
       }
-
     };
 
 
-    const hrdps = {
+    const sisters =
+      await getHRDPSPoint(
+        locations.sistersIslets
+      );
 
-      sistersIslets:
-        await getHRDPSPoint(
-          locations.sistersIslets
-        ),
-
-      ballenasIsland:
-        await getHRDPSPoint(
-          locations.ballenasIsland
-        )
-
-    };
+    const ballenas =
+      await getHRDPSPoint(
+        locations.ballenasIsland
+      );
 
 
     return Response.json({
@@ -41,34 +35,15 @@ export default async () => {
       generatedAt:
         new Date().toISOString(),
 
-      route: {
-        name:
-          "Lasqueti Island ↔ French Creek",
-        region:
-          "Strait of Georgia"
+      model: {
+        name: "HRDPS",
+        source:
+          "Environment and Climate Change Canada"
       },
 
-      models: {
-
-        hrdps: {
-
-          name:
-            "HRDPS",
-
-          source:
-            "Environment and Climate Change Canada",
-
-          resolutionKm:
-            2.5,
-
-          status:
-            "live",
-
-          locations:
-            hrdps
-
-        }
-
+      locations: {
+        sistersIslets: sisters,
+        ballenasIsland: ballenas
       }
 
     });
@@ -76,11 +51,7 @@ export default async () => {
 
   } catch (error) {
 
-    console.error(
-      "HRDPS comparison error:",
-      error
-    );
-
+    console.error(error);
 
     return Response.json(
       {
@@ -99,38 +70,10 @@ export default async () => {
 
 
 // ======================================================
-// HRDPS POINT QUERY
+// HRDPS POINT
 // ======================================================
 
-async function getHRDPSPoint(
-  location
-) {
-
-  const bboxSize =
-    0.025;
-
-
-  const west =
-    location.longitude -
-    bboxSize;
-
-  const east =
-    location.longitude +
-    bboxSize;
-
-  const south =
-    location.latitude -
-    bboxSize;
-
-  const north =
-    location.latitude +
-    bboxSize;
-
-
-  // --------------------------------------------------
-  // First retrieve layer metadata.
-  // This gives us the current available forecast times.
-  // --------------------------------------------------
+async function getHRDPSPoint(location) {
 
   const capabilitiesUrl =
     "https://geo.weather.gc.ca/geomet" +
@@ -141,133 +84,70 @@ async function getHRDPSPoint(
 
 
   const capabilitiesResponse =
-    await fetch(
-      capabilitiesUrl
-    );
-
-
-  if (
-    !capabilitiesResponse.ok
-  ) {
-
-    throw new Error(
-      `HRDPS capabilities request failed: ${capabilitiesResponse.status}`
-    );
-
-  }
+    await fetch(capabilitiesUrl);
 
 
   const capabilities =
     await capabilitiesResponse.text();
 
 
-  // --------------------------------------------------
-  // Find available forecast datetimes.
-  // --------------------------------------------------
-
-  // --------------------------------------------------
-// Find GeoMet's default valid forecast time.
-// The text inside <Dimension> is a RANGE.
-// The "default" attribute is a single valid time.
-// --------------------------------------------------
-
-const timeDimensionMatch =
-  capabilities.match(
-    /<Dimension[^>]*name=["']time["'][^>]*default=["']([^"']+)["'][^>]*>/i
-  );
+  const timeMatch =
+    capabilities.match(
+      /<Dimension[^>]*name=["']time["'][^>]*default=["']([^"']+)["'][^>]*>/i
+    );
 
 
-if (!timeDimensionMatch) {
-
-  return {
-    location: location.name,
-    available: false,
-    reason: "No valid HRDPS forecast time found."
-  };
-
-}
+  const referenceMatch =
+    capabilities.match(
+      /<Dimension[^>]*name=["']reference_time["'][^>]*default=["']([^"']+)["'][^>]*>/i
+    );
 
 
-const selectedTime =
-  timeDimensionMatch[1];
+  if (!timeMatch) {
+
+    return {
+      available: false,
+      reason: "No HRDPS forecast time found."
+    };
+
+  }
 
 
-// --------------------------------------------------
-// Find the latest model run/reference time.
-// --------------------------------------------------
-
-const referenceTimeMatch =
-  capabilities.match(
-    /<Dimension[^>]*name=["']reference_time["'][^>]*default=["']([^"']+)["'][^>]*>/i
-  );
+  const forecastTime =
+    timeMatch[1];
 
 
-const referenceTime =
-  referenceTimeMatch
-    ? referenceTimeMatch[1]
-    : null;
+  const referenceTime =
+    referenceMatch
+      ? referenceMatch[1]
+      : null;
 
-  // --------------------------------------------------
-  // Query wind speed.
-  // --------------------------------------------------
 
-  const windSpeedResult =
-    await getFeatureValue({
-
-      layer:
-        "HRDPS.CONTINENTAL_WSPD",
-
-      time:
-        selectedTime,
+  const windSpeed =
+    await getFeatureValue(
+      "HRDPS.CONTINENTAL_WSPD",
+      location,
+      forecastTime,
       referenceTime
-      west,
-      south,
-      east,
-      north
-
-    });
+    );
 
 
-  // --------------------------------------------------
-  // Query wind direction.
-  // --------------------------------------------------
-
-  const windDirectionResult =
-    await getFeatureValue({
-
-      layer:
-        "HRDPS.CONTINENTAL_WD",
-
-      time:
-        selectedTime,
-        referenceTime
-      west,
-      south,
-      east,
-      north
-
-    });
-
-
-  // --------------------------------------------------
-  // Query maximum gust.
-  // --------------------------------------------------
-
-  const gustResult =
-    await getFeatureValue({
-
-      layer:
-        "HRDPS.CONTINENTAL_WGX",
-
-      time:
-        selectedTime,
+  const windDirection =
+    await getFeatureValue(
+      "HRDPS.CONTINENTAL_WD",
+      location,
+      forecastTime,
       referenceTime
-      west,
-      south,
-      east,
-      north
+    );
 
-    });
+
+  const gust =
+    await getFeatureValue(
+      "HRDPS.CONTINENTAL_WGX",
+      location,
+      forecastTime,
+      referenceTime
+    );
 
 
   return {
@@ -275,45 +155,47 @@ const referenceTime =
     location:
       location.name,
 
-    available:
-      true,
+    available: true,
 
     modelRunTime:
-  referenceTime,
+      referenceTime,
 
     forecastFor:
-      selectedTime,
-      
+      forecastTime,
+
     wind: {
-debug: {
 
-  windSpeed:
-    windSpeedResult.debug,
-
-  windDirection:
-    windDirectionResult.debug,
-
-  gust:
-    gustResult.debug
-
-}
       speedKnots:
         msToKnots(
-          windSpeedResult.value
+          windSpeed.value
         ),
 
       directionDegrees:
-        windDirectionResult.value,
+        windDirection.value,
 
       directionCardinal:
         degreesToCardinal(
-          windDirectionResult.value
+          windDirection.value
         ),
 
       gustKnots:
         msToKnots(
-          gustResult.value
+          gust.value
         )
+
+    },
+
+
+    debug: {
+
+      windSpeed:
+        windSpeed,
+
+      windDirection:
+        windDirection,
+
+      gust:
+        gust
 
     }
 
@@ -324,75 +206,96 @@ debug: {
 
 
 // ======================================================
-// WMS FEATURE INFO
+// FEATURE INFO
 // ======================================================
 
-async function getFeatureValue({
+async function getFeatureValue(
   layer,
+  location,
   time,
-  referenceTime,
-  west,
-  south,
-  east,
-  north
-}) {
+  referenceTime
+) {
+
+  const padding =
+    0.025;
+
+
+  const west =
+    location.longitude -
+    padding;
+
+  const east =
+    location.longitude +
+    padding;
+
+  const south =
+    location.latitude -
+    padding;
+
+  const north =
+    location.latitude +
+    padding;
+
 
   const params =
-  new URLSearchParams({
+    new URLSearchParams({
 
-    SERVICE:
-      "WMS",
+      SERVICE:
+        "WMS",
 
-    VERSION:
-      "1.3.0",
+      VERSION:
+        "1.3.0",
 
-    REQUEST:
-      "GetFeatureInfo",
+      REQUEST:
+        "GetFeatureInfo",
 
-    LAYERS:
-      layer,
+      LAYERS:
+        layer,
 
-    QUERY_LAYERS:
-      layer,
+      QUERY_LAYERS:
+        layer,
 
-    CRS:
-      "EPSG:4326",
+      CRS:
+        "EPSG:4326",
 
-    BBOX:
-      `${south},${west},${north},${east}`,
+      BBOX:
+        `${south},${west},${north},${east}`,
 
-    WIDTH:
-      "101",
+      WIDTH:
+        "101",
 
-    HEIGHT:
-      "101",
+      HEIGHT:
+        "101",
 
-    I:
-      "50",
+      I:
+        "50",
 
-    J:
-      "50",
+      J:
+        "50",
 
-    FORMAT:
-      "image/png",
+      FORMAT:
+        "image/png",
 
-    INFO_FORMAT:
-      "application/json",
+      INFO_FORMAT:
+        "application/json",
 
-    FEATURE_COUNT:
-      "1",
+      FEATURE_COUNT:
+        "1",
 
-    TIME:
-      time
+      TIME:
+        time
 
-  });
+    });
+
 
   if (referenceTime) {
-  params.set(
-    "DIM_REFERENCE_TIME",
-    referenceTime
-  );
-}
+
+    params.set(
+      "DIM_REFERENCE_TIME",
+      referenceTime
+    );
+
+  }
 
 
   const url =
@@ -401,102 +304,126 @@ async function getFeatureValue({
 
 
   const response =
-    await fetch(
-      url
-    );
+    await fetch(url);
+
+
+  const text =
+    await response.text();
 
 
   if (!response.ok) {
 
-    return null;
+    return {
+
+      value: null,
+
+      status:
+        response.status,
+
+      responsePreview:
+        text.slice(0, 800),
+
+      requestUrl:
+        url
+
+    };
 
   }
 
-
-  const text =
-  await response.text();
-
-
-if (
-  text.trim().startsWith("<")
-) {
-
-  console.error(
-    `GeoMet XML response for ${layer}:`,
-    text.slice(0, 1000)
-  );
-
-  return null;
-
-}
-
-
-const data =
-  JSON.parse(text);
-
-const feature =
-  data.features?.[0];
-
-if (!feature) {
-
-  return {
-    value: null,
-    debug: {
-      layer,
-      time,
-      referenceTime,
-      response: data
-    }
-  };
-
-}
-
-const props =
-  feature.properties || {};
-
-return {
-  value:
-    props.value !== undefined &&
-    !Number.isNaN(Number(props.value))
-      ? Number(props.value)
-      : null,
-
-  debug: {
-    layer,
-    time,
-    referenceTime,
-    properties: props
-  }
-};
-
-
-  // GeoMet normally returns the layer value
-  // as one numeric property. Find the first number.
 
   if (
-  typeof props.value === "number"
-) {
+    text.trim().startsWith("<")
+  ) {
 
-  return props.value;
+    return {
 
-}
+      value: null,
+
+      responseType:
+        "XML",
+
+      responsePreview:
+        text.slice(0, 800),
+
+      requestUrl:
+        url
+
+    };
+
+  }
 
 
-if (
-  props.value !== undefined &&
-  !Number.isNaN(
-    Number(props.value)
-  )
-) {
-
-  return Number(
-    props.value
-  );
-
-}
+  let data;
 
 
-return null;
+  try {
+
+    data =
+      JSON.parse(text);
+
+  } catch {
+
+    return {
+
+      value: null,
+
+      responseType:
+        "UNKNOWN",
+
+      responsePreview:
+        text.slice(0, 800),
+
+      requestUrl:
+        url
+
+    };
+
+  }
+
+
+  const feature =
+    data.features?.[0];
+
+
+  const props =
+    feature?.properties ||
+    null;
+
+
+  let value =
+    null;
+
+
+  if (
+    props &&
+    props.value !== undefined &&
+    !Number.isNaN(
+      Number(props.value)
+    )
+  ) {
+
+    value =
+      Number(
+        props.value
+      );
+
+  }
+
+
+  return {
+
+    value,
+
+    properties:
+      props,
+
+    featureCount:
+      data.features?.length || 0,
+
+    requestUrl:
+      url
+
+  };
 
 }
 
@@ -506,9 +433,7 @@ return null;
 // HELPERS
 // ======================================================
 
-function msToKnots(
-  value
-) {
+function msToKnots(value) {
 
   if (
     value === null ||
@@ -533,10 +458,7 @@ function msToKnots(
 }
 
 
-
-function degreesToCardinal(
-  degrees
-) {
+function degreesToCardinal(degrees) {
 
   if (
     degrees === null ||
@@ -571,17 +493,16 @@ function degreesToCardinal(
   ];
 
 
-  const normalized =
-    (
-      Number(degrees) %
-      360 +
-      360
-    ) % 360;
-
-
   const index =
     Math.round(
-      normalized /
+      (
+        (
+          Number(degrees) %
+          360
+        ) +
+        360
+      ) %
+      360 /
       22.5
     ) % 16;
 
@@ -589,4 +510,3 @@ function degreesToCardinal(
   return directions[index];
 
 }
-    
