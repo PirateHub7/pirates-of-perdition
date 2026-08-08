@@ -733,16 +733,45 @@
       };
 
 
-      console.log("Captain Report:", report);
+      try {
 
+  statusBox.style.display = "block";
+  statusBox.innerHTML = "Submitting report...";
 
-      statusBox.style.display = "block";
+  const response = await fetch(
+    "/.netlify/functions/submit-captain-report",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(report)
+    }
+  );
 
-      statusBox.innerHTML = `
-        <strong>Report prepared successfully.</strong><br>
-        The submission system has not been connected yet,
-        so this report has only been created locally in your browser.
-      `;
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.error || "Submission failed.");
+  }
+
+  statusBox.innerHTML = `
+    <strong>Captain report submitted successfully.</strong><br>
+    Report ID: ${result.reportId}
+  `;
+
+  form.reset();
+
+} catch (error) {
+
+  statusBox.style.display = "block";
+
+  statusBox.innerHTML = `
+    <strong>Report could not be submitted.</strong><br>
+    ${error.message}
+  `;
+
+}
 
     });
 
