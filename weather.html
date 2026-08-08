@@ -2067,114 +2067,15 @@ async function refreshDashboard() {
 
     loadStations(),
 
+    loadModelComparison(),
+
     loadCaptainReports(),
 
     loadBriefing()
 
-    loadModelComparison(),
-
   ]);
 
 }
-
-  async function loadModelComparison() {
-
-  const container =
-    document.getElementById(
-      "modelComparison"
-    );
-
-
-  try {
-
-    const [
-      modelResponse,
-      marineResponse
-    ] = await Promise.all([
-
-      fetch(
-        "/.netlify/functions/get-model-comparison"
-      ),
-
-      fetch(
-        "/.netlify/functions/get-marine-data"
-      )
-
-    ]);
-
-
-    const modelData =
-      await modelResponse.json();
-
-    const marineData =
-      await marineResponse.json();
-
-
-    if (
-      !modelData.success ||
-      !marineData.success
-    ) {
-
-      throw new Error(
-        "Comparison data unavailable"
-      );
-
-    }
-
-
-    const sistersForecast =
-      modelData.locations
-        ?.sistersIslets;
-
-    const ballenasForecast =
-      modelData.locations
-        ?.ballenasIsland;
-
-
-    const sistersActual =
-      marineData.observations
-        ?.sistersIslets;
-
-    const ballenasActual =
-      marineData.observations
-        ?.ballenasIsland;
-
-
-    container.innerHTML = [
-
-      renderModelComparison(
-        "Sisters Islets",
-        sistersForecast,
-        sistersActual
-      ),
-
-      renderModelComparison(
-        "Ballenas Island",
-        ballenasForecast,
-        ballenasActual
-      )
-
-    ].join("");
-
-
-  } catch (error) {
-
-    container.innerHTML = `
-
-      <div class="station error">
-
-        Forecast comparison
-        could not be loaded.
-
-      </div>
-
-    `;
-
-  }
-
-}
-
-
 
 refreshDashboard();
 
