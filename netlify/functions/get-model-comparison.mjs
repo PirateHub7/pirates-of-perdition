@@ -211,7 +211,7 @@ const referenceTime =
   // Query wind speed.
   // --------------------------------------------------
 
-  const windSpeed =
+  const windSpeedResult =
     await getFeatureValue({
 
       layer:
@@ -232,7 +232,7 @@ const referenceTime =
   // Query wind direction.
   // --------------------------------------------------
 
-  const windDirection =
+  const windDirectionResult =
     await getFeatureValue({
 
       layer:
@@ -253,7 +253,7 @@ const referenceTime =
   // Query maximum gust.
   // --------------------------------------------------
 
-  const gust =
+  const gustResult =
     await getFeatureValue({
 
       layer:
@@ -285,23 +285,34 @@ const referenceTime =
       selectedTime,
       
     wind: {
+debug: {
 
+  windSpeed:
+    windSpeedResult.debug,
+
+  windDirection:
+    windDirectionResult.debug,
+
+  gust:
+    gustResult.debug
+
+}
       speedKnots:
         msToKnots(
-          windSpeed
+          windSpeedResult.value
         ),
 
       directionDegrees:
-        windDirection,
+        windDirectionResult.value,
 
       directionCardinal:
         degreesToCardinal(
-          windDirection
+          windDirectionResult.value
         ),
 
       gustKnots:
         msToKnots(
-          gust
+          gustResult.value
         )
 
     }
@@ -423,20 +434,40 @@ if (
 const data =
   JSON.parse(text);
 
+const feature =
+  data.features?.[0];
 
-  const feature =
-    data.features?.[0];
+if (!feature) {
 
+  return {
+    value: null,
+    debug: {
+      layer,
+      time,
+      referenceTime,
+      response: data
+    }
+  };
 
-  if (!feature) {
+}
 
-    return null;
+const props =
+  feature.properties || {};
 
+return {
+  value:
+    props.value !== undefined &&
+    !Number.isNaN(Number(props.value))
+      ? Number(props.value)
+      : null,
+
+  debug: {
+    layer,
+    time,
+    referenceTime,
+    properties: props
   }
-
-
-  const props =
-    feature.properties || {};
+};
 
 
   // GeoMet normally returns the layer value
