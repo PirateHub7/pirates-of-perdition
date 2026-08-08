@@ -1,0 +1,69 @@
+{
+  "reports": [
+    {
+      "reportId": "CR-0001",
+      "submittedAt": "2026-08-07T10:45:00-07:00",
+
+      "captain": {
+        "name": "Sample Captain",
+        "verified": true,
+        "operatorType": "Local commercial operator"
+      },
+
+      "route": {
+        "from": "French Creek",
+        "to": "Lasqueti Island",
+        "direction": "Westbound"
+      },
+
+      "location": {
+        "area": "French Creek to mid-Strait",
+        "latitude": null,
+        "longitude": null
+      },
+
+      "vessel": {
+        "lengthFeet": 24,
+        "type": "Enclosed powerboat",
+        "notes": ""
+      },
+
+      "observation": {
+        "timeObserved": "2026-08-07T10:30:00-07:00",
+
+        "wind": {
+          "direction": "NW",
+          "speedKnots": 13,
+          "gustKnots": 17,
+          "estimated": true
+        },
+
+        "seaState": {
+          "category": "Short steep chop",
+          "estimatedWaveHeightFeet": "2-3",
+          "waveDirection": "NW",
+          "wavePeriodSeconds": null,
+          "confusedSea": false,
+          "breakingWaves": false
+        },
+
+        "visibility": "Excellent",
+
+        "precipitation": "None",
+
+        "rideQuality": "Moderately rough",
+
+        "passengerComfort": "Reduced",
+
+        "speedImpact": "Reduced speed required",
+
+        "notes": "Conditions were roughest during the first five miles out of French Creek and improved approaching mid-Strait."
+      },
+
+      "confidence": {
+        "captainConfidence": "HIGH",
+        "reportRecencyMinutes": 15
+      }
+    }
+  ]
+}
