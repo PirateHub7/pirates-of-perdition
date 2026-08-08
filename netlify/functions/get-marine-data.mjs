@@ -2,96 +2,36 @@ export default async () => {
 
   try {
 
-    const url =
-      "https://weather.gc.ca/marine/weatherConditions-currentConditions_e.html?mapID=03&siteID=07000&stationID=WGT";
+    const stations = [
+      {
+        key: "sistersIslets",
+        name: "Sisters Islets",
+        stationCode: "WGT",
+        latitude: 49.49,
+        longitude: -124.43
+      },
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `Environment Canada request failed: ${response.status}`
-      );
-    }
-
-    const html = await response.text();
-
-
-    // ---------------------------------------------
-    // FIND CURRENT WIND
-    // Environment Canada page contains text like:
-    // Wind (knots) | NW 12
-    // ---------------------------------------------
-
-    const windMatch = html.match(
-      /Wind[\s\S]*?\(knots\)[\s\S]*?([NSEW]{1,3}|CALM|VRB)\s+(\d+)/i
-    );
+      {
+        key: "ballenasIsland",
+        name: "Ballenas Island",
+        stationCode: "WGB",
+        latitude: 49.35,
+        longitude: -124.16
+      }
+    ];
 
 
-    let windDirection = null;
-    let windSpeedKnots = null;
+    const observations = {};
 
 
-    if (windMatch) {
+    for (const station of stations) {
 
-      windDirection =
-        windMatch[1].toUpperCase();
+      const observation =
+        await getLatestObservation(station);
 
-      windSpeedKnots =
-        Number(windMatch[2]);
+      observations[station.key] =
+        observation;
 
-    }
-
-
-    // ---------------------------------------------
-    // FIND OBSERVATION TIME
-    // ---------------------------------------------
-
-    const timeMatch = html.match(
-      /(\d{1,2}:\d{2}\s*(?:AM|PM)\s*PDT[\s\S]*?\d{1,2}\s+[A-Za-z]+\s+\d{4})/i
-    );
-
-
-    let observationTime = null;
-
-    if (timeMatch) {
-      observationTime =
-        timeMatch[1]
-          .replace(/\s+/g, " ")
-          .trim();
-    }
-
-
-    // ---------------------------------------------
-    // FIND TEMPERATURE
-    // ---------------------------------------------
-
-    const temperatureMatch = html.match(
-      /Air temperature[\s\S]*?(-?\d+(?:\.\d+)?)/i
-    );
-
-
-    let airTemperatureC = null;
-
-    if (temperatureMatch) {
-      airTemperatureC =
-        Number(temperatureMatch[1]);
-    }
-
-
-    // ---------------------------------------------
-    // FIND PRESSURE
-    // ---------------------------------------------
-
-    const pressureMatch = html.match(
-      /Pressure and tendency[\s\S]*?(\d{3}\.\d)/i
-    );
-
-
-    let pressureKpa = null;
-
-    if (pressureMatch) {
-      pressureKpa =
-        Number(pressureMatch[1]);
     }
 
 
@@ -100,32 +40,17 @@ export default async () => {
       success: true,
 
       source: {
-        name: "Environment Canada",
-        station: "Sisters Islets",
-        stationCode: "WGT",
-        official: true
+        name:
+          "Environment and Climate Change Canada",
+
+        dataset:
+          "SWOB Real-Time Surface Weather Observations",
+
+        official:
+          true
       },
 
-      observation: {
-
-        observedAt:
-          observationTime,
-
-        wind: {
-          direction:
-            windDirection,
-
-          speedKnots:
-            windSpeedKnots
-        },
-
-        airTemperatureC:
-          airTemperatureC,
-
-        pressureKpa:
-          pressureKpa
-
-      },
+      observations,
 
       fetchedAt:
         new Date().toISOString()
@@ -135,7 +60,11 @@ export default async () => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Marine observation error:",
+      error
+    );
+
 
     return Response.json(
       {
@@ -148,5 +77,316 @@ export default async () => {
     );
 
   }
+
+};
+
+
+// ======================================================
+// GET LATEST OBSERVATION NEAR A STATION LOCATION
+// ======================================================
+
+async function getLatestObservation(station) {
+
+  const padding = 0.04;
+
+  const west =
+    station.longitude - padding;
+
+  const south =
+    station.latitude - padding;
+
+  const east =
+    station.longitude + padding;
+
+  const north =
+    station.latitude + padding;
+
+
+  const params =
+    new URLSearchParams({
+
+      f: "json",
+
+      bbox:
+        `${west},${south},${east},${north}`,
+
+      limit:
+        "100"
+
+    });
+
+
+  const url =
+    "https://api.weather.gc.ca/collections/swob-realtime/items?" +
+    params.toString();
+
+
+  const response =
+    await fetch(url);
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      `${station.name} SWOB request failed: ${response.status}`
+    );
+
+  }
+
+
+  const data =
+    await response.json();
+
+
+  const features =
+    data.features || [];
+
+
+  if (features.length === 0) {
+
+    return {
+
+      station:
+        station.name,
+
+      stationCode:
+        station.stationCode,
+
+      available:
+        false,
+
+      reason:
+        "No SWOB observations found near station coordinates."
+
+    };
+
+  }
+
+
+  // -----------------------------------------------
+  // SORT BY OBSERVATION TIME
+  // -----------------------------------------------
+
+  features.sort(
+    (a, b) => {
+
+      const timeA =
+        getObservationTime(
+          a.properties
+        );
+
+      const timeB =
+        getObservationTime(
+          b.properties
+        );
+
+      return (
+        new Date(timeB || 0) -
+        new Date(timeA || 0)
+      );
+
+    }
+  );
+
+
+  const latest =
+    features[0];
+
+
+  const props =
+    latest.properties || {};
+
+
+  // -----------------------------------------------
+  // WIND
+  // SWOB field names can vary slightly by station.
+  // We check the standard variants without
+  // manufacturing missing values.
+  // -----------------------------------------------
+
+  const speedMs =
+    firstNumber(
+      props.avg_wnd_spd_10m_pst10mts,
+      props.avg_wnd_spd_pst10mts,
+      props.avg_wnd_spd_10m_pst2mts,
+      props.avg_wnd_spd_pst2mts,
+      props.wnd_spd
+    );
+
+
+  const gustMs =
+    firstNumber(
+      props.max_wnd_spd_10m_pst10mts,
+      props.max_wnd_spd_pst10mts,
+      props.max_wnd_spd_pst1hr,
+      props.wnd_gust_spd
+    );
+
+
+  const directionDegrees =
+    firstNumber(
+      props.avg_wnd_dir_10m_pst10mts,
+      props.avg_wnd_dir_pst10mts,
+      props.avg_wnd_dir_10m_pst2mts,
+      props.avg_wnd_dir_pst2mts,
+      props.wnd_dir
+    );
+
+
+  return {
+
+    station:
+      station.name,
+
+    stationCode:
+      station.stationCode,
+
+    available:
+      true,
+
+    observedAt:
+      getObservationTime(
+        props
+      ),
+
+    wind: {
+
+      speedKnots:
+        metresPerSecondToKnots(
+          speedMs
+        ),
+
+      gustKnots:
+        metresPerSecondToKnots(
+          gustMs
+        ),
+
+      directionDegrees:
+        directionDegrees,
+
+      directionCardinal:
+        degreesToCardinal(
+          directionDegrees
+        )
+
+    },
+
+    airTemperatureC:
+      firstNumber(
+        props.air_temp,
+        props.avg_air_temp_pst1hr
+      ),
+
+    pressureKpa:
+      firstNumber(
+        props.stn_pres,
+        props.pres
+      ),
+
+    sourceRecordId:
+      latest.id || null
+
+  };
+
+}
+
+
+// ======================================================
+// HELPERS
+// ======================================================
+
+function getObservationTime(props) {
+
+  return (
+    props.date_tm ||
+    props.datetime ||
+    props.observation_time ||
+    props.obs_time ||
+    props.time ||
+    null
+  );
+
+}
+
+
+function firstNumber(...values) {
+
+  for (const value of values) {
+
+    if (
+      value !== null &&
+      value !== undefined &&
+      value !== "" &&
+      !Number.isNaN(
+        Number(value)
+      )
+    ) {
+
+      return Number(value);
+
+    }
+
+  }
+
+  return null;
+
+}
+
+
+function metresPerSecondToKnots(value) {
+
+  if (value === null) {
+    return null;
+  }
+
+  return Number(
+    (value * 1.94384)
+      .toFixed(1)
+  );
+
+}
+
+
+function degreesToCardinal(degrees) {
+
+  if (
+    degrees === null ||
+    degrees === undefined
+  ) {
+
+    return null;
+
+  }
+
+
+  const directions = [
+
+    "N",
+    "NNE",
+    "NE",
+    "ENE",
+    "E",
+    "ESE",
+    "SE",
+    "SSE",
+    "S",
+    "SSW",
+    "SW",
+    "WSW",
+    "W",
+    "WNW",
+    "NW",
+    "NNW"
+
+  ];
+
+
+  const index =
+    Math.round(
+      degrees / 22.5
+    ) % 16;
+
+
+  return directions[index];
 
 }
