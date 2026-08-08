@@ -64,8 +64,8 @@ export default async () => {
 async function getDatamartObservation(station) {
 
   const url =
-    `https://dd.weather.gc.ca/today/observations/swob-ml/latest/` +
-    `latest_${station.stationCode}_AUTO_swob.xml`;
+  `https://dd.weather.gc.ca/today/observations/swob-ml/latest/` +
+  `${station.stationCode}-AUTO-swob.xml`;
 
   const response = await fetch(url);
 
