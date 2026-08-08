@@ -87,19 +87,13 @@ export default async () => {
 
 async function getLatestObservation(station) {
 
-  const padding = 0.04;
+  const now = new Date();
 
-  const west =
-    station.longitude - padding;
-
-  const south =
-    station.latitude - padding;
-
-  const east =
-    station.longitude + padding;
-
-  const north =
-    station.latitude + padding;
+  const sixHoursAgo =
+    new Date(
+      now.getTime() -
+      6 * 60 * 60 * 1000
+    );
 
 
   const params =
@@ -107,8 +101,8 @@ async function getLatestObservation(station) {
 
       f: "json",
 
-      bbox:
-        `${west},${south},${east},${north}`,
+      datetime:
+        `${sixHoursAgo.toISOString()}/${now.toISOString()}`,
 
       limit:
         "100"
@@ -142,7 +136,66 @@ async function getLatestObservation(station) {
     data.features || [];
 
 
-  if (features.length === 0) {
+  // --------------------------------------------------
+  // FIND THE EXACT STATION
+  //
+  // SWOB records include station identifiers in
+  // different fields depending on the station/network.
+  // --------------------------------------------------
+
+  const stationMatches =
+    features.filter(feature => {
+
+      const props =
+        feature.properties || {};
+
+      const possibleIds = [
+
+        props.wmo_id,
+        props.icao_id,
+        props.iata_id,
+        props.msc_id,
+        props.station_id,
+        props.stn_id,
+        props.station,
+        props.name,
+        props.name_en
+
+      ]
+        .filter(Boolean)
+        .map(value =>
+          String(value)
+            .trim()
+            .toUpperCase()
+        );
+
+
+      const target =
+        station.stationCode
+          .toUpperCase();
+
+
+      // Also inspect record IDs like:
+      // CWGT-AUTO-swob.xml
+      const recordId =
+        String(
+          feature.id || ""
+        ).toUpperCase();
+
+
+      return (
+        possibleIds.includes(target) ||
+        recordId.includes(
+          `C${target}`
+        )
+      );
+
+    });
+
+
+  if (
+    stationMatches.length === 0
+  ) {
 
     return {
 
@@ -156,13 +209,152 @@ async function getLatestObservation(station) {
         false,
 
       reason:
-        "No SWOB observations found near station coordinates."
+        "No recent exact-station SWOB observation was found.",
+
+      recordsChecked:
+        features.length
 
     };
 
   }
 
 
+  // --------------------------------------------------
+  // NEWEST MATCH FIRST
+  // --------------------------------------------------
+
+  stationMatches.sort(
+    (a, b) => {
+
+      const timeA =
+        getObservationTime(
+          a.properties || {}
+        );
+
+      const timeB =
+        getObservationTime(
+          b.properties || {}
+        );
+
+      return (
+        new Date(timeB || 0) -
+        new Date(timeA || 0)
+      );
+
+    }
+  );
+
+
+  const latest =
+    stationMatches[0];
+
+
+  const props =
+    latest.properties || {};
+
+
+  const speedMs =
+    firstNumber(
+
+      props.avg_wnd_spd_10m_pst10mts,
+
+      props.avg_wnd_spd_pst10mts,
+
+      props.avg_wnd_spd_10m_pst2mts,
+
+      props.avg_wnd_spd_pst2mts,
+
+      props.wnd_spd
+
+    );
+
+
+  const gustMs =
+    firstNumber(
+
+      props.max_wnd_spd_10m_pst10mts,
+
+      props.max_wnd_spd_pst10mts,
+
+      props.max_wnd_spd_pst1hr,
+
+      props.wnd_gust_spd
+
+    );
+
+
+  const directionDegrees =
+    firstNumber(
+
+      props.avg_wnd_dir_10m_pst10mts,
+
+      props.avg_wnd_dir_pst10mts,
+
+      props.avg_wnd_dir_10m_pst2mts,
+
+      props.avg_wnd_dir_pst2mts,
+
+      props.wnd_dir
+
+    );
+
+
+  return {
+
+    station:
+      station.name,
+
+    stationCode:
+      station.stationCode,
+
+    available:
+      true,
+
+    observedAt:
+      getObservationTime(
+        props
+      ),
+
+    wind: {
+
+      speedKnots:
+        metresPerSecondToKnots(
+          speedMs
+        ),
+
+      gustKnots:
+        metresPerSecondToKnots(
+          gustMs
+        ),
+
+      directionDegrees:
+        directionDegrees,
+
+      directionCardinal:
+        degreesToCardinal(
+          directionDegrees
+        )
+
+    },
+
+    airTemperatureC:
+      firstNumber(
+        props.air_temp,
+        props.avg_air_temp_pst1hr
+      ),
+
+    pressureKpa:
+      firstNumber(
+        props.stn_pres,
+        props.pres
+      ),
+
+    sourceRecordId:
+      latest.id || null
+
+  };
+
+}
   // -----------------------------------------------
   // SORT BY OBSERVATION TIME
   // -----------------------------------------------
