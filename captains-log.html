@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Captain's Log | Pirates of Perdition</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #0b0d0e;
+      color: #eee5d2;
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.5;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 16px 70px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .eyebrow {
+      color: #c9a24d;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.8rem;
+    }
+
+    h1 {
+      margin: 8px 0 10px;
+      font-size: clamp(2.4rem, 8vw, 4.2rem);
+      text-transform: uppercase;
+    }
+
+    .intro {
+      max-width: 700px;
+      margin: 0 auto;
+      color: #c9c3b6;
+    }
+
+    .notice {
+      margin: 30px 0;
+      padding: 18px;
+      border-left: 4px solid #c9a24d;
+      background: #15191a;
+      color: #d9d3c7;
+    }
+
+    form {
+      display: grid;
+      gap: 25px;
+    }
+
+    fieldset {
+      border: 1px solid #55492f;
+      background: #111516;
+      padding: 22px;
+      margin: 0;
+    }
+
+    legend {
+      color: #c9a24d;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      color: #ddd4c2;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #4d4f4e;
+      background: #090b0c;
+      color: #fff;
+      font: inherit;
+      border-radius: 3px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid #c9a24d;
+      border-color: transparent;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .checkbox-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .checkbox-row label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+    }
+
+    .checkbox-row input {
+      width: auto;
+    }
+
+    .submit-button {
+      border: 1px solid #c9a24d;
+      background: #c9a24d;
+      color: #111;
+      padding: 16px 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .submit-button:hover {
+      background: #e0bb63;
+    }
+
+    .status {
+      display: none;
+      padding: 18px;
+      margin-top: 20px;
+      background: #152019;
+      border: 1px solid #496752;
+    }
+
+    .footer-note {
+      margin-top: 30px;
+      color: #9e9a91;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    @media (max-width: 650px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      fieldset {
+        padding: 18px 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<main class="page">
+
+  <header class="header">
+
+    <div class="eyebrow">
+      Marine Intelligence Network
+    </div>
+
+    <h1>Captain's Log</h1>
+
+    <p class="intro">
+      Record an actual voyage and the conditions experienced underway.
+      These operational records can later be compared with forecasts,
+      station observations and captain reports to strengthen future briefings.
+    </p>
+
+  </header>
+
+
+  <div class="notice">
+    <strong>Record what actually happened.</strong><br>
+    The Captain's Log is intended to preserve operational history.
+    Estimates are acceptable when clearly identified as estimates.
+  </div>
+
+
+  <form id="captainsLogForm">
+
+
+    <!-- CAPTAIN -->
+
+    <fieldset>
+
+      <legend>Captain</legend>
+
+      <div class="grid">
+
+        <div>
+          <label for="captainName">
+            Captain Name
+          </label>
+
+          <input
+            type="text"
+            id="captainName"
+            required
+          >
+        </div>
+
+        <div>
+          <label for="operatorType">
+            Operator Type
+          </label>
+
+          <select
+            id="operatorType"
+            required
+          >
+            <option value="">Select</option>
+            <option>Water taxi</option>
+            <option>Commercial operator</option>
+            <option>Charter operator</option>
+            <option>Fishing vessel</option>
+            <option>Recreational operator</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+      </div>
+
+    </fieldset>
+
+
+    <!-- VOYAGE -->
+
+    <fieldset>
+
+      <legend>Voyage</legend>
+
+      <div class="grid">
+
+        <div>
+          <label for="from">
+            Departed From
+          </label>
+
+          <input
+            type="text"
+            id="from"
+            placeholder="French Creek"
+            required
+          >
+        </div>
+
+
+        <div>
+          <label for="to">
+            Destination
+          </label>
+
+          <input
+            type="text"
+            id="to"
+            placeholder="Lasqueti Island"
+            required
+          >
+        </div>
+
+
+        <div>
+          <label for="departureTime">
+            Departure Time
+          </label>
+
+          <input
+            type="datetime-local"
+            id="departureTime"
+            required
+          >
+        </div>
+
+
+        <div>
+          <label for="arrivalTime">
+            Arrival Time
+          </label>
+
+          <input
+            type="datetime-local"
+            id="arrivalTime"
+            required
+          >
+        </div>
+
+
+        <div>
+          <label for="passengers">
+            Passengers
+          </label>
+
+          <input
+            type="number"
+            id="passengers"
+            min="0"
+            step="1"
+          >
+        </div>
+
+
+        <div>
+          <label for="tripType">
+            Voyage Type
+          </label>
+
+          <select id="tripType">
+
+            <option value="">
+              Select
+            </option>
+
+            <option>
+              Commercial charter
+            </option>
+
+            <option>
+              Passenger transfer
+            </option>
+
+            <option>
+              Cargo / supplies
+            </option>
+
+            <option>
+              Positioning voyage
+            </option>
+
+            <option>
+              Training
+            </option>
+
+            <option>
+              Personal voyage
+            </option>
+
+            <option>
+              Other
+            </option>
+
+          </select>
+        </div>
+
+      </div>
+
+    </fieldset>
+
+
+    <!-- VESSEL -->
+
+    <fieldset>
+
+      <legend>Vessel</legend>
+
+      <div class="grid">
+
+        <div>
+          <label for="vesselName">
+            Vessel Name / Identifier
+          </label>
+
+          <input
+            type="text"
+            id="vesselName"
+          >
+        </div>
+
+
+        <div>
+          <label for="vesselType">
+            Vessel Type
+          </label>
+
+          <select id="vesselType">
+
+            <option value="">
+              Select
+            </option>
+
+            <option>
+              Open powerboat
+            </option>
+
+            <option>
+              Enclosed powerboat
+            </option>
+
+            <option>
+              RIB
+            </option>
+
+            <option>
+              Passenger vessel
+            </option>
+
+            <option>
+              Fishing vessel
+            </option>
+
+            <option>
+              Sailboat
+            </option>
+
+            <option>
+              Other
+            </option>
+
+          </select>
+        </div>
+
+
+        <div>
+          <label for="vesselLength">
+            Length (feet)
+          </label>
+
+          <input
+            type="number"
+            id="vesselLength"
+            min="1"
+            max="300"
+            step="0.1"
+          >
+        </div>
+
+
+        <div>
+          <label for="loadLevel">
+            Vessel Load
+          </label>
+
+          <select id="loadLevel">
+
+            <option value="">
+              Unknown
+            </option>
+
+            <option>
+              Light
+            </option>
+
+            <option>
+              Moderate
+            </option>
+
+            <option>
+              Heavy
+            </option>
+
+            <option>
+              Near maximum operating load
+            </option>
+
+          </select>
+        </div>
+
+      </div>
+
+    </fieldset>
+
+
+    <!-- CONDITIONS -->
+
+    <fieldset>
+
+      <legend>Observed Conditions</legend>
+
+      <div class="grid">
+
+        <div>
+          <label for="windDirection">
+            Wind Direction
+          </label>
+
+          <select id="windDirection">
+
+            <option value="">Unknown</option>
+            <option>N</option>
+            <option>NE</option>
+            <option>E</option>
+            <option>SE</option>
+            <option>S</option>
+            <option>SW</option>
+            <option>W</option>
+            <option>NW</option>
+            <option>Variable</option>
+            <option>Calm</option>
+
+          </select>
+        </div>
+
+
+        <div>
+          <label for="windSpeed">
+            Estimated Wind (knots)
+          </label>
+
+          <input
+            type="number"
+            id="windSpeed"
+            min="0"
+            max="100"
+            step="1"
+          >
+        </div>
+
+
+        <div>
+          <label for="seaState">
+            Sea State
+          </label>
+
+          <select id="seaState">
+
+            <option value="">
+              Select
+            </option>
+
+            <option>Calm</option>
+            <option>Light chop</option>
+            <option>Moderate chop</option>
+            <option>Short steep chop</option>
+            <option>Moderate swell</option>
+            <option>Large swell</option>
+            <option>Confused sea</option>
+            <option>Breaking seas</option>
+
+          </select>
+        </div>
+
+
+        <div>
+          <label for="waveHeight">
+            Estimated Wave Height
+          </label>
+
+          <select id="waveHeight">
+
+            <option value="">Unknown</option>
+            <option>Less than 1 ft</option>
+            <option>1-2 ft</option>
+            <option>2-3 ft</option>
+            <option>3-4 ft</option>
+            <option>4-6 ft</option>
+            <option>6-8 ft</option>
+            <option>8+ ft</option>
+
+          </select>
+        </div>
+
+
+        <div>
+          <label for="visibility">
+            Visibility
+          </label>
+
+          <select id="visibility">
+
+            <option value="">
+              Select
+            </option>
+
+            <option>Excellent</option>
+            <option>Good</option>
+            <option>Moderate</option>
+            <option>Poor</option>
+            <option>Very poor</option>
+
+          </select>
+        </div>
+
+
+        <div>
+          <label for="weatherTrend">
+            Conditions During Voyage
+          </label>
+
+          <select id="weatherTrend">
+
+            <option value="">
+              Select
+            </option>
+
+            <option>Improving</option>
+            <option>Steady</option>
+            <option>Deteriorating</option>
+            <option>Highly variable</option>
+
+          </select>
+        </div>
+
+      </div>
+
+    </fieldset>
+
+
+    <!-- OPERATIONS -->
+
+    <fieldset>
+
+      <legend>Operational Performance</legend>
+
+      <div class="grid">
+
+        <div>
+          <label for="averageSpeed">
+            Approximate Average Speed (knots)
+          </label>
+
+          <input
+            type="number"
+            id="averageSpeed"
+            min="0"
+            max="100"
+            step="0.1"
+          >
+        </div>
+
+
+        <div>
+          <label for="speedImpact">
+            Effect on Speed
+          </label>
+
+          <select id="speedImpact">
+
+            <option value="">Unknown</option>
+            <option>No reduction required</option>
+            <option>Slight speed reduction</option>
+            <option>Moderate speed reduction</option>
+            <option>Significant speed reduction</option>
+
+          </select>
+        </div>
+
+
+        <div>
+          <label for="rideQuality">
+            Ride Quality
+          </label>
+
+          <select id="rideQuality">
+
+            <option value="">
+              Select
+            </option>
+
+            <option>Smooth</option>
+            <option>Slightly active</option>
+            <option>Moderate</option>
+            <option>Rough</option>
+            <option>Very rough</option>
+
+          </select>
+        </div>
+
+
+        <div>
+          <label for="passengerComfort">
+            Passenger Comfort
+          </label>
+
+          <select id="passengerComfort">
+
+            <option value="">
+              Not applicable / unknown
+            </option>
+
+            <option>Comfortable</option>
+            <option>Some motion</option>
+            <option>Reduced comfort</option>
+            <option>Significant discomfort</option>
+
+          </select>
+        </div>
+
+
+        <div>
+          <label for="fuelUsed">
+            Fuel Used (litres, optional)
+          </label>
+
+          <input
+            type="number"
+            id="fuelUsed"
+            min="0"
+            step="0.1"
+          >
+        </div>
+
+
+        <div>
+          <label for="captainWorkload">
+            Captain Workload
+          </label>
+
+          <select id="captainWorkload">
+
+            <option value="">
+              Select
+            </option>
+
+            <option>Low</option>
+            <option>Normal</option>
+            <option>Elevated</option>
+            <option>High</option>
+            <option>Very high</option>
+
+          </select>
+        </div>
+
+      </div>
+
+    </fieldset>
+
+
+    <!-- LOCAL CONDITIONS -->
+
+    <fieldset>
+
+      <legend>Route Observations</legend>
+
+      <div class="grid">
+
+        <div>
+          <label for="roughestArea">
+            Roughest Area
+          </label>
+
+          <input
+            type="text"
+            id="roughestArea"
+            placeholder="Example: Outside French Creek"
+          >
+        </div>
+
+
+        <div>
+          <label for="calmestArea">
+            Calmest Area
+          </label>
+
+          <input
+            type="text"
+            id="calmestArea"
+            placeholder="Example: Approaching Lasqueti"
+          >
+        </div>
+
+
+        <div class="full">
+          <label for="notes">
+            Captain's Notes
+          </label>
+
+          <textarea
+            id="notes"
+            placeholder="Describe wave shape, unexpected conditions, route differences, current effects, vessel behaviour, or anything else that would help another captain understand the crossing."
+          ></textarea>
+        </div>
+
+      </div>
+
+    </fieldset>
+
+
+    <!-- CONFIDENCE -->
+
+    <fieldset>
+
+      <legend>Observation Confidence</legend>
+
+      <div class="grid">
+
+        <div>
+          <label for="confidence">
+            Confidence in This Report
+          </label>
+
+          <select
+            id="confidence"
+            required
+          >
+
+            <option value="">
+              Select
+            </option>
+
+            <option>HIGH</option>
+            <option>MODERATE</option>
+            <option>LOW</option>
+
+          </select>
+        </div>
+
+
+        <div>
+          <label for="confidenceReason">
+            Reason
+          </label>
+
+          <input
+            type="text"
+            id="confidenceReason"
+            placeholder="Example: Completed full route and observed directly"
+          >
+        </div>
+
+      </div>
+
+    </fieldset>
+
+
+    <button
+      type="submit"
+      class="submit-button"
+    >
+      Save Captain's Log
+    </button>
+
+  </form>
+
+
+  <div
+    id="status"
+    class="status"
+  ></div>
+
+
+  <div class="footer-note">
+    Captain's Log records are operational observations.
+    They do not replace official navigation, weather or safety information.
+  </div>
+
+</main>
+
+
+<script>
+
+const form =
+  document.getElementById("captainsLogForm");
+
+const statusBox =
+  document.getElementById("status");
+
+
+form.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+
+    const log = {
+
+      submittedAt:
+        new Date().toISOString(),
+
+      captain: {
+
+        name:
+          document.getElementById(
+            "captainName"
+          ).value,
+
+        operatorType:
+          document.getElementById(
+            "operatorType"
+          ).value
+
+      },
+
+
+      voyage: {
+
+        from:
+          document.getElementById(
+            "from"
+          ).value,
+
+        to:
+          document.getElementById(
+            "to"
+          ).value,
+
+        departureTime:
+          document.getElementById(
+            "departureTime"
+          ).value,
+
+        arrivalTime:
+          document.getElementById(
+            "arrivalTime"
+          ).value,
+
+        passengers:
+          Number(
+            document.getElementById(
+              "passengers"
+            ).value
+          ) || 0,
+
+        tripType:
+          document.getElementById(
+            "tripType"
+          ).value || null
+
+      },
+
+
+      vessel: {
+
+        name:
+          document.getElementById(
+            "vesselName"
+          ).value || null,
+
+        type:
+          document.getElementById(
+            "vesselType"
+          ).value || null,
+
+        lengthFeet:
+          Number(
+            document.getElementById(
+              "vesselLength"
+            ).value
+          ) || null,
+
+        loadLevel:
+          document.getElementById(
+            "loadLevel"
+          ).value || null
+
+      },
+
+
+      conditions: {
+
+        wind: {
+
+          direction:
+            document.getElementById(
+              "windDirection"
+            ).value || null,
+
+          speedKnots:
+            Number(
+              document.getElementById(
+                "windSpeed"
+              ).value
+            ) || null,
+
+          estimated: true
+
+        },
+
+        seaState:
+          document.getElementById(
+            "seaState"
+          ).value || null,
+
+        waveHeight:
+          document.getElementById(
+            "waveHeight"
+          ).value || null,
+
+        visibility:
+          document.getElementById(
+            "visibility"
+          ).value || null,
+
+        trend:
+          document.getElementById(
+            "weatherTrend"
+          ).value || null
+
+      },
+
+
+      operations: {
+
+        averageSpeedKnots:
+          Number(
+            document.getElementById(
+              "averageSpeed"
+            ).value
+          ) || null,
+
+        speedImpact:
+          document.getElementById(
+            "speedImpact"
+          ).value || null,
+
+        rideQuality:
+          document.getElementById(
+            "rideQuality"
+          ).value || null,
+
+        passengerComfort:
+          document.getElementById(
+            "passengerComfort"
+          ).value || null,
+
+        fuelUsedLitres:
+          Number(
+            document.getElementById(
+              "fuelUsed"
+            ).value
+          ) || null,
+
+        captainWorkload:
+          document.getElementById(
+            "captainWorkload"
+          ).value || null
+
+      },
+
+
+      routeObservations: {
+
+        roughestArea:
+          document.getElementById(
+            "roughestArea"
+          ).value || null,
+
+        calmestArea:
+          document.getElementById(
+            "calmestArea"
+          ).value || null,
+
+        notes:
+          document.getElementById(
+            "notes"
+          ).value.trim()
+
+      },
+
+
+      confidence: {
+
+        level:
+          document.getElementById(
+            "confidence"
+          ).value,
+
+        reason:
+          document.getElementById(
+            "confidenceReason"
+          ).value || null
+
+      }
+
+    };
+
+
+    console.log(
+      "Captain's Log:",
+      log
+    );
+
+
+    statusBox.style.display =
+      "block";
+
+    statusBox.innerHTML = `
+      <strong>Captain's Log prepared successfully.</strong><br>
+      Storage has not been connected yet.
+    `;
+
+  }
+);
+
+</script>
+
+</body>
+</html>
