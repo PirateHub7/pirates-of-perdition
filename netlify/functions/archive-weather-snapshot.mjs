@@ -1,6 +1,6 @@
 import { getStore } from "@netlify/blobs";
 
-export default async () => {
+const handler = async () => {
 
   try {
 
@@ -16,7 +16,8 @@ export default async () => {
 
     const comparison = await response.json();
 
-    const snapshotTime = new Date().toISOString();
+    const snapshotTime =
+      new Date().toISOString();
 
     const snapshotId =
       "WEATHER-" +
@@ -48,41 +49,44 @@ export default async () => {
       {
         metadata: {
           snapshotTime,
-          type:
-            "weather-snapshot"
+          type: "weather-snapshot"
         }
       }
     );
 
 
-    return Response.json({
+    console.log(
+      `Weather snapshot archived: ${snapshotId}`
+    );
 
-      success: true,
 
-      snapshotId,
-
-      snapshotTime,
-
-      message:
-        "Weather snapshot archived successfully."
-
-    });
+    return {
+      statusCode: 200
+    };
 
 
   } catch (error) {
 
-    console.error(error);
-
-    return Response.json(
-      {
-        success: false,
-        error: error.message
-      },
-      {
-        status: 500
-      }
+    console.error(
+      "Weather archive failed:",
+      error
     );
+
+
+    return {
+      statusCode: 500
+    };
 
   }
 
-}
+};
+
+
+// Runs every hour
+
+export const config = {
+  schedule: "0 * * * *"
+};
+
+
+export default handler;
