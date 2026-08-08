@@ -6,65 +6,43 @@ export default async () => {
       {
         key: "sistersIslets",
         name: "Sisters Islets",
-        stationCode: "WGT",
-        latitude: 49.49,
-        longitude: -124.43
+        stationCode: "CWGT"
       },
-
       {
         key: "ballenasIsland",
         name: "Ballenas Island",
-        stationCode: "WGB",
-        latitude: 49.35,
-        longitude: -124.16
+        stationCode: "CWGB"
       }
     ];
 
-
     const observations = {};
 
-
     for (const station of stations) {
-
-      const observation =
-        await getLatestObservation(station);
-
       observations[station.key] =
-        observation;
-
+        await getDatamartObservation(station);
     }
 
-
     return Response.json({
-
       success: true,
 
       source: {
-        name:
-          "Environment and Climate Change Canada",
-
-        dataset:
-          "SWOB Real-Time Surface Weather Observations",
-
-        official:
-          true
+        name: "Environment and Climate Change Canada",
+        service: "MSC Datamart",
+        dataset: "SWOB Met-ML",
+        official: true
       },
 
       observations,
 
-      fetchedAt:
-        new Date().toISOString()
-
+      fetchedAt: new Date().toISOString()
     });
-
 
   } catch (error) {
 
     console.error(
-      "Marine observation error:",
+      "Datamart observation error:",
       error
     );
-
 
     return Response.json(
       {
@@ -75,475 +53,422 @@ export default async () => {
         status: 500
       }
     );
-
   }
-
 };
 
 
 // ======================================================
-// GET LATEST OBSERVATION NEAR A STATION LOCATION
+// GET LATEST DATAMART OBSERVATION
 // ======================================================
 
-async function getLatestObservation(station) {
-
-  const now = new Date();
-
-  const sixHoursAgo =
-    new Date(
-      now.getTime() -
-      6 * 60 * 60 * 1000
-    );
-
-
-  const params =
-    new URLSearchParams({
-
-      f: "json",
-
-      datetime:
-        `${sixHoursAgo.toISOString()}/${now.toISOString()}`,
-
-      limit:
-        "100"
-
-    });
-
+async function getDatamartObservation(station) {
 
   const url =
-    "https://api.weather.gc.ca/collections/swob-realtime/items?" +
-    params.toString();
+    `https://dd.weather.gc.ca/today/observations/swob-ml/latest/` +
+    `latest_${station.stationCode}_AUTO_swob.xml`;
 
-
-  const response =
-    await fetch(url);
-
+  const response = await fetch(url);
 
   if (!response.ok) {
 
-    throw new Error(
-      `${station.name} SWOB request failed: ${response.status}`
-    );
+    return {
+      station: station.name,
+      stationCode: station.stationCode,
+      available: false,
+      reason:
+        `Datamart request failed with status ${response.status}`,
+      sourceUrl: url
+    };
 
   }
 
-
-  const data =
-    await response.json();
+  const xml = await response.text();
 
 
-  const features =
-    data.features || [];
+  // ====================================================
+  // OBSERVATION TIME
+  // ====================================================
+
+  const observedAt =
+    getElementValue(
+      xml,
+      "date_tm"
+    ) ||
+    getElementValue(
+      xml,
+      "date_tm-value"
+    );
 
 
-  // --------------------------------------------------
-  // FIND THE EXACT STATION
+  // ====================================================
+  // WIND
   //
-  // SWOB records include station identifiers in
-  // different fields depending on the station/network.
-  // --------------------------------------------------
+  // Prefer the official 10-minute mean at 10 m.
+  // ====================================================
 
-  const stationMatches =
-    features.filter(feature => {
-
-      const props =
-        feature.properties || {};
-
-      const possibleIds = [
-
-        props.wmo_id,
-        props.icao_id,
-        props.iata_id,
-        props.msc_id,
-        props.station_id,
-        props.stn_id,
-        props.station,
-        props.name,
-        props.name_en
-
+  const windSpeed =
+    getElement(
+      xml,
+      [
+        "avg_wnd_spd_10m_pst10mts",
+        "avg_wnd_spd_pst10mts",
+        "avg_wnd_spd_10m_pst2mts",
+        "avg_wnd_spd_pst2mts"
       ]
-        .filter(Boolean)
-        .map(value =>
-          String(value)
-            .trim()
-            .toUpperCase()
-        );
+    );
 
 
-      const target =
-        station.stationCode
-          .toUpperCase();
+  const windDirection =
+    getElement(
+      xml,
+      [
+        "avg_wnd_dir_10m_pst10mts",
+        "avg_wnd_dir_pst10mts",
+        "avg_wnd_dir_10m_pst2mts",
+        "avg_wnd_dir_pst2mts"
+      ]
+    );
 
 
-      // Also inspect record IDs like:
-      // CWGT-AUTO-swob.xml
-      const recordId =
-        String(
-          feature.id || ""
-        ).toUpperCase();
+  // Official SWOB distinguishes maximum wind speed
+  // and reportable wind gust. Prefer gust if present.
+
+  const gust =
+    getElement(
+      xml,
+      [
+        "max_wnd_gst_spd_10m_pst10mts",
+        "max_pk_wnd_spd_10m_pst1hr",
+        "max_wnd_spd_10m_pst10mts",
+        "max_wnd_spd_10m_pst1hr"
+      ]
+    );
 
 
-      return (
-        possibleIds.includes(target) ||
-        recordId.includes(
-          `C${target}`
-        )
+  const temperature =
+    getElement(
+      xml,
+      [
+        "air_temp",
+        "avg_air_temp_pst1hr"
+      ]
+    );
+
+
+  const pressure =
+    getElement(
+      xml,
+      [
+        "stn_pres",
+        "mslp",
+        "pres"
+      ]
+    );
+
+
+  return {
+
+    station:
+      station.name,
+
+    stationCode:
+      station.stationCode,
+
+    available:
+      true,
+
+    observedAt,
+
+    wind: {
+
+      speedKnots:
+        convertWindToKnots(
+          windSpeed
+        ),
+
+      gustKnots:
+        convertWindToKnots(
+          gust
+        ),
+
+      directionDegrees:
+        windDirection?.value ?? null,
+
+      directionCardinal:
+        degreesToCardinal(
+          windDirection?.value ?? null
+        ),
+
+      sourcePeriod:
+        windSpeed?.name ?? null
+    },
+
+    airTemperatureC:
+      convertTemperature(
+        temperature
+      ),
+
+    pressureKpa:
+      convertPressureToKpa(
+        pressure
+      ),
+
+    sourceFile:
+      `latest_${station.stationCode}_AUTO_swob.xml`,
+
+    sourceUrl:
+      url
+
+  };
+
+}
+
+
+// ======================================================
+// XML HELPERS
+// ======================================================
+
+function getElement(
+  xml,
+  possibleNames
+) {
+
+  for (const name of possibleNames) {
+
+    const escaped =
+      name.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&"
       );
 
-    });
+    const regex =
+      new RegExp(
+        `<element\\b[^>]*\\bname=["']${escaped}["'][^>]*>`,
+        "i"
+      );
+
+    const match =
+      xml.match(regex);
+
+    if (!match) {
+      continue;
+    }
 
 
-  if (
-    stationMatches.length === 0
-  ) {
+    const tag =
+      match[0];
+
+
+    const valueMatch =
+      tag.match(
+        /\bvalue=["']([^"']*)["']/i
+      );
+
+    const unitMatch =
+      tag.match(
+        /\buom=["']([^"']*)["']/i
+      );
+
+
+    if (!valueMatch) {
+      continue;
+    }
+
+
+    const numericValue =
+      Number(
+        valueMatch[1]
+      );
+
 
     return {
 
-      station:
-        station.name,
+      name,
 
-      stationCode:
-        station.stationCode,
+      value:
+        Number.isNaN(
+          numericValue
+        )
+          ? valueMatch[1]
+          : numericValue,
 
-      available:
-        false,
-
-      reason:
-        "No recent exact-station SWOB observation was found.",
-
-      recordsChecked:
-        features.length
+      unit:
+        unitMatch
+          ? unitMatch[1]
+          : null
 
     };
 
   }
 
-
-  // --------------------------------------------------
-  // NEWEST MATCH FIRST
-  // --------------------------------------------------
-
-  stationMatches.sort(
-    (a, b) => {
-
-      const timeA =
-        getObservationTime(
-          a.properties || {}
-        );
-
-      const timeB =
-        getObservationTime(
-          b.properties || {}
-        );
-
-      return (
-        new Date(timeB || 0) -
-        new Date(timeA || 0)
-      );
-
-    }
-  );
-
-
-  const latest =
-    stationMatches[0];
-
-
-  const props =
-    latest.properties || {};
-
-
-  const speedMs =
-    firstNumber(
-
-      props.avg_wnd_spd_10m_pst10mts,
-
-      props.avg_wnd_spd_pst10mts,
-
-      props.avg_wnd_spd_10m_pst2mts,
-
-      props.avg_wnd_spd_pst2mts,
-
-      props.wnd_spd
-
-    );
-
-
-  const gustMs =
-    firstNumber(
-
-      props.max_wnd_spd_10m_pst10mts,
-
-      props.max_wnd_spd_pst10mts,
-
-      props.max_wnd_spd_pst1hr,
-
-      props.wnd_gust_spd
-
-    );
-
-
-  const directionDegrees =
-    firstNumber(
-
-      props.avg_wnd_dir_10m_pst10mts,
-
-      props.avg_wnd_dir_pst10mts,
-
-      props.avg_wnd_dir_10m_pst2mts,
-
-      props.avg_wnd_dir_pst2mts,
-
-      props.wnd_dir
-
-    );
-
-
-  return {
-
-    station:
-      station.name,
-
-    stationCode:
-      station.stationCode,
-
-    available:
-      true,
-
-    observedAt:
-      getObservationTime(
-        props
-      ),
-
-    wind: {
-
-      speedKnots:
-        metresPerSecondToKnots(
-          speedMs
-        ),
-
-      gustKnots:
-        metresPerSecondToKnots(
-          gustMs
-        ),
-
-      directionDegrees:
-        directionDegrees,
-
-      directionCardinal:
-        degreesToCardinal(
-          directionDegrees
-        )
-
-    },
-
-    airTemperatureC:
-      firstNumber(
-        props.air_temp,
-        props.avg_air_temp_pst1hr
-      ),
-
-    pressureKpa:
-      firstNumber(
-        props.stn_pres,
-        props.pres
-      ),
-
-    sourceRecordId:
-      latest.id || null
-
-  };
-
-}
-  // -----------------------------------------------
-  // SORT BY OBSERVATION TIME
-  // -----------------------------------------------
-
-  features.sort(
-    (a, b) => {
-
-      const timeA =
-        getObservationTime(
-          a.properties
-        );
-
-      const timeB =
-        getObservationTime(
-          b.properties
-        );
-
-      return (
-        new Date(timeB || 0) -
-        new Date(timeA || 0)
-      );
-
-    }
-  );
-
-
-  const latest =
-    features[0];
-
-
-  const props =
-    latest.properties || {};
-
-
-  // -----------------------------------------------
-  // WIND
-  // SWOB field names can vary slightly by station.
-  // We check the standard variants without
-  // manufacturing missing values.
-  // -----------------------------------------------
-
-  const speedMs =
-    firstNumber(
-      props.avg_wnd_spd_10m_pst10mts,
-      props.avg_wnd_spd_pst10mts,
-      props.avg_wnd_spd_10m_pst2mts,
-      props.avg_wnd_spd_pst2mts,
-      props.wnd_spd
-    );
-
-
-  const gustMs =
-    firstNumber(
-      props.max_wnd_spd_10m_pst10mts,
-      props.max_wnd_spd_pst10mts,
-      props.max_wnd_spd_pst1hr,
-      props.wnd_gust_spd
-    );
-
-
-  const directionDegrees =
-    firstNumber(
-      props.avg_wnd_dir_10m_pst10mts,
-      props.avg_wnd_dir_pst10mts,
-      props.avg_wnd_dir_10m_pst2mts,
-      props.avg_wnd_dir_pst2mts,
-      props.wnd_dir
-    );
-
-
-  return {
-
-    station:
-      station.name,
-
-    stationCode:
-      station.stationCode,
-
-    available:
-      true,
-
-    observedAt:
-      getObservationTime(
-        props
-      ),
-
-    wind: {
-
-      speedKnots:
-        metresPerSecondToKnots(
-          speedMs
-        ),
-
-      gustKnots:
-        metresPerSecondToKnots(
-          gustMs
-        ),
-
-      directionDegrees:
-        directionDegrees,
-
-      directionCardinal:
-        degreesToCardinal(
-          directionDegrees
-        )
-
-    },
-
-    airTemperatureC:
-      firstNumber(
-        props.air_temp,
-        props.avg_air_temp_pst1hr
-      ),
-
-    pressureKpa:
-      firstNumber(
-        props.stn_pres,
-        props.pres
-      ),
-
-    sourceRecordId:
-      latest.id || null
-
-  };
-
-}
-
-
-// ======================================================
-// HELPERS
-// ======================================================
-
-function getObservationTime(props) {
-
-  return (
-    props.date_tm ||
-    props.datetime ||
-    props.observation_time ||
-    props.obs_time ||
-    props.time ||
-    null
-  );
-
-}
-
-
-function firstNumber(...values) {
-
-  for (const value of values) {
-
-    if (
-      value !== null &&
-      value !== undefined &&
-      value !== "" &&
-      !Number.isNaN(
-        Number(value)
-      )
-    ) {
-
-      return Number(value);
-
-    }
-
-  }
-
   return null;
-
 }
 
 
-function metresPerSecondToKnots(value) {
+function getElementValue(
+  xml,
+  name
+) {
 
-  if (value === null) {
+  const element =
+    getElement(
+      xml,
+      [name]
+    );
+
+  return element
+    ? element.value
+    : null;
+}
+
+
+// ======================================================
+// UNIT CONVERSIONS
+// ======================================================
+
+function convertWindToKnots(
+  observation
+) {
+
+  if (
+    !observation ||
+    typeof observation.value !== "number"
+  ) {
+
     return null;
+
   }
+
+
+  const unit =
+    String(
+      observation.unit || ""
+    ).toLowerCase();
+
+
+  let knots;
+
+
+  if (
+    unit.includes("km/h") ||
+    unit.includes("km h")
+  ) {
+
+    knots =
+      observation.value *
+      0.539957;
+
+  } else if (
+    unit === "m/s" ||
+    unit.includes("m s")
+  ) {
+
+    knots =
+      observation.value *
+      1.94384;
+
+  } else if (
+    unit.includes("knot") ||
+    unit === "kt"
+  ) {
+
+    knots =
+      observation.value;
+
+  } else {
+
+    return null;
+
+  }
+
 
   return Number(
-    (value * 1.94384)
-      .toFixed(1)
+    knots.toFixed(1)
   );
-
 }
 
 
-function degreesToCardinal(degrees) {
+function convertTemperature(
+  observation
+) {
+
+  if (
+    !observation ||
+    typeof observation.value !== "number"
+  ) {
+
+    return null;
+
+  }
+
+  return observation.value;
+}
+
+
+function convertPressureToKpa(
+  observation
+) {
+
+  if (
+    !observation ||
+    typeof observation.value !== "number"
+  ) {
+
+    return null;
+
+  }
+
+
+  const unit =
+    String(
+      observation.unit || ""
+    ).toLowerCase();
+
+
+  if (
+    unit === "hpa" ||
+    unit.includes("hectopascal")
+  ) {
+
+    return Number(
+      (
+        observation.value /
+        10
+      ).toFixed(1)
+    );
+
+  }
+
+
+  if (
+    unit === "kpa"
+  ) {
+
+    return Number(
+      observation.value.toFixed(1)
+    );
+
+  }
+
+
+  return null;
+}
+
+
+// ======================================================
+// CARDINAL WIND DIRECTION
+// ======================================================
+
+function degreesToCardinal(
+  degrees
+) {
 
   if (
     degrees === null ||
-    degrees === undefined
+    degrees === undefined ||
+    Number.isNaN(
+      Number(degrees)
+    )
   ) {
 
     return null;
@@ -552,7 +477,6 @@ function degreesToCardinal(degrees) {
 
 
   const directions = [
-
     "N",
     "NNE",
     "NE",
@@ -569,16 +493,23 @@ function degreesToCardinal(degrees) {
     "WNW",
     "NW",
     "NNW"
-
   ];
+
+
+  const normalized =
+    (
+      Number(degrees) %
+      360 +
+      360
+    ) % 360;
 
 
   const index =
     Math.round(
-      degrees / 22.5
+      normalized /
+      22.5
     ) % 16;
 
 
   return directions[index];
-
 }
