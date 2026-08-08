@@ -165,95 +165,47 @@ async function getHRDPSPoint(
   // Find available forecast datetimes.
   // --------------------------------------------------
 
-  const timeMatch =
-    capabilities.match(
-      /<Dimension[^>]*name=["']time["'][^>]*>([\s\S]*?)<\/Dimension>/i
-    );
-
-
-  if (!timeMatch) {
-
-    return {
-
-      location:
-        location.name,
-
-      available:
-        false,
-
-      reason:
-        "No HRDPS forecast times found."
-
-    };
-
-  }
-
-
-  const times =
-    timeMatch[1]
-      .split(",")
-      .map(
-        item =>
-          item.trim()
-      )
-      .filter(Boolean);
-
-
-  if (
-    times.length === 0
-  ) {
-
-    return {
-
-      location:
-        location.name,
-
-      available:
-        false,
-
-      reason:
-        "No HRDPS forecast times available."
-
-    };
-
-  }
-
-
   // --------------------------------------------------
-  // Choose nearest forecast time at or after now.
-  // --------------------------------------------------
+// Find GeoMet's default valid forecast time.
+// The text inside <Dimension> is a RANGE.
+// The "default" attribute is a single valid time.
+// --------------------------------------------------
 
-  const now =
-    Date.now();
-
-
-  let selectedTime =
-    times[0];
-
-
-  for (
-    const time of times
-  ) {
-
-    const timestamp =
-      new Date(
-        time
-      ).getTime();
+const timeDimensionMatch =
+  capabilities.match(
+    /<Dimension[^>]*name=["']time["'][^>]*default=["']([^"']+)["'][^>]*>/i
+  );
 
 
-    if (
-      timestamp >= now
-    ) {
+if (!timeDimensionMatch) {
 
-      selectedTime =
-        time;
+  return {
+    location: location.name,
+    available: false,
+    reason: "No valid HRDPS forecast time found."
+  };
 
-      break;
+}
 
-    }
 
-  }
+const selectedTime =
+  timeDimensionMatch[1];
 
+
+// --------------------------------------------------
+// Find the latest model run/reference time.
+// --------------------------------------------------
+
+const referenceTimeMatch =
+  capabilities.match(
+    /<Dimension[^>]*name=["']reference_time["'][^>]*default=["']([^"']+)["'][^>]*>/i
+  );
+
+
+const referenceTime =
+  referenceTimeMatch
+    ? referenceTimeMatch[1]
+    : null;
 
   // --------------------------------------------------
   // Query wind speed.
@@ -267,7 +219,7 @@ async function getHRDPSPoint(
 
       time:
         selectedTime,
-
+      referenceTime
       west,
       south,
       east,
@@ -288,7 +240,7 @@ async function getHRDPSPoint(
 
       time:
         selectedTime,
-
+        referenceTime
       west,
       south,
       east,
@@ -309,7 +261,7 @@ async function getHRDPSPoint(
 
       time:
         selectedTime,
-
+      referenceTime
       west,
       south,
       east,
@@ -326,9 +278,12 @@ async function getHRDPSPoint(
     available:
       true,
 
+    modelRunTime:
+  referenceTime,
+
     forecastFor:
       selectedTime,
-
+      
     wind: {
 
       speedKnots:
@@ -364,6 +319,7 @@ async function getHRDPSPoint(
 async function getFeatureValue({
   layer,
   time,
+  referenceTime,
   west,
   south,
   east,
@@ -419,6 +375,13 @@ async function getFeatureValue({
       time
 
   });
+
+  if (referenceTime) {
+  params.set(
+    "DIM_REFERENCE_TIME",
+    referenceTime
+  );
+}
 
 
   const url =
