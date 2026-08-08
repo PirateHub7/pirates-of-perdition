@@ -865,7 +865,29 @@
 
   </div>
 
+<div class="section-title">
 
+  <span>
+    Forecast Comparison
+  </span>
+
+  <h2>
+    HRDPS vs Actual
+  </h2>
+
+</div>
+
+
+<div
+  id="modelComparison"
+  class="station-grid"
+>
+
+  <div class="station loading">
+    Loading HRDPS comparison...
+  </div>
+
+</div>
 
   <!-- ========================================
        CAPTAIN REPORTS
@@ -1351,8 +1373,258 @@ function renderStation(
 
 }
 
+async function loadModelComparison() {
+
+  const container =
+    document.getElementById(
+      "modelComparison"
+    );
 
 
+  try {
+
+    const [
+      modelResponse,
+      marineResponse
+    ] = await Promise.all([
+
+      fetch(
+        "/.netlify/functions/get-model-comparison"
+      ),
+
+      fetch(
+        "/.netlify/functions/get-marine-data"
+      )
+
+    ]);
+
+
+    const modelData =
+      await modelResponse.json();
+
+    const marineData =
+      await marineResponse.json();
+
+
+    if (
+      !modelData.success ||
+      !marineData.success
+    ) {
+
+      throw new Error(
+        "Comparison data unavailable"
+      );
+
+    }
+
+
+    const sistersForecast =
+      modelData.locations
+        ?.sistersIslets;
+
+    const ballenasForecast =
+      modelData.locations
+        ?.ballenasIsland;
+
+
+    const sistersActual =
+      marineData.observations
+        ?.sistersIslets;
+
+    const ballenasActual =
+      marineData.observations
+        ?.ballenasIsland;
+
+
+    container.innerHTML = [
+
+      renderModelComparison(
+        "Sisters Islets",
+        sistersForecast,
+        sistersActual
+      ),
+
+      renderModelComparison(
+        "Ballenas Island",
+        ballenasForecast,
+        ballenasActual
+      )
+
+    ].join("");
+
+
+  } catch (error) {
+
+    container.innerHTML = `
+
+      <div class="station error">
+
+        Forecast comparison
+        could not be loaded.
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+  function renderModelComparison(
+  name,
+  forecast,
+  actual
+) {
+
+  const forecastWind =
+    forecast?.wind?.speedKnots;
+
+  const actualWind =
+    actual?.wind?.speedKnots;
+
+
+  let difference =
+    null;
+
+
+  if (
+    typeof forecastWind === "number" &&
+    typeof actualWind === "number"
+  ) {
+
+    difference =
+      Number(
+        (
+          actualWind -
+          forecastWind
+        ).toFixed(1)
+      );
+
+  }
+
+
+  let errorText =
+    "—";
+
+
+  if (
+    difference !== null
+  ) {
+
+    if (
+      difference > 0
+    ) {
+
+      errorText =
+        `Actual +${difference} kt above HRDPS`;
+
+    } else if (
+      difference < 0
+    ) {
+
+      errorText =
+        `Actual ${difference} kt below HRDPS`;
+
+    } else {
+
+      errorText =
+        "HRDPS matched actual wind speed";
+
+    }
+
+  }
+
+
+  return `
+
+    <article class="station">
+
+
+      <div class="station-name">
+
+        ${name}
+
+      </div>
+
+
+      <div class="metrics">
+
+
+        <div class="metric">
+
+          <div class="metric-label">
+
+            HRDPS Forecast
+
+          </div>
+
+          <div class="metric-value">
+
+            ${safe(
+              forecast?.wind
+                ?.directionCardinal
+            )}
+
+            ${safe(
+              forecastWind
+            )}
+
+            kt
+
+          </div>
+
+        </div>
+
+
+        <div class="metric">
+
+          <div class="metric-label">
+
+            Actual
+
+          </div>
+
+          <div class="metric-value">
+
+            ${safe(
+              actual?.wind
+                ?.directionCardinal
+            )}
+
+            ${safe(
+              actualWind
+            )}
+
+            kt
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="observed">
+
+        ${errorText}
+
+        <br>
+
+        HRDPS valid:
+
+        ${formatTime(
+          forecast?.forecastFor
+        )}
+
+      </div>
+
+
+    </article>
+
+  `;
+
+}
 // ======================================================
 // CAPTAIN REPORTS
 // ======================================================
@@ -1799,7 +2071,106 @@ async function refreshDashboard() {
 
     loadBriefing()
 
+    loadModelComparison(),
+
   ]);
+
+}
+
+  async function loadModelComparison() {
+
+  const container =
+    document.getElementById(
+      "modelComparison"
+    );
+
+
+  try {
+
+    const [
+      modelResponse,
+      marineResponse
+    ] = await Promise.all([
+
+      fetch(
+        "/.netlify/functions/get-model-comparison"
+      ),
+
+      fetch(
+        "/.netlify/functions/get-marine-data"
+      )
+
+    ]);
+
+
+    const modelData =
+      await modelResponse.json();
+
+    const marineData =
+      await marineResponse.json();
+
+
+    if (
+      !modelData.success ||
+      !marineData.success
+    ) {
+
+      throw new Error(
+        "Comparison data unavailable"
+      );
+
+    }
+
+
+    const sistersForecast =
+      modelData.locations
+        ?.sistersIslets;
+
+    const ballenasForecast =
+      modelData.locations
+        ?.ballenasIsland;
+
+
+    const sistersActual =
+      marineData.observations
+        ?.sistersIslets;
+
+    const ballenasActual =
+      marineData.observations
+        ?.ballenasIsland;
+
+
+    container.innerHTML = [
+
+      renderModelComparison(
+        "Sisters Islets",
+        sistersForecast,
+        sistersActual
+      ),
+
+      renderModelComparison(
+        "Ballenas Island",
+        ballenasForecast,
+        ballenasActual
+      )
+
+    ].join("");
+
+
+  } catch (error) {
+
+    container.innerHTML = `
+
+      <div class="station error">
+
+        Forecast comparison
+        could not be loaded.
+
+      </div>
+
+    `;
+
+  }
 
 }
 
