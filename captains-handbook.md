@@ -567,3 +567,160 @@ What information is uncertain.
 What factors deserve attention.
 
 The Captain's Briefing Generator must never replace the judgment of the captain.
+
+# Forecast Model Comparison
+
+The Captain's Briefing Generator should compare independent forecast models.
+
+Forecast models should remain separate.
+
+Never average multiple forecasts unless clearly identified as an ensemble calculation.
+
+Model disagreement is valuable information.
+
+If models disagree significantly, confidence should be reduced.
+
+When models strongly agree, confidence may increase.
+
+Where historical model performance is available, it should be considered as supporting evidence.
+
+Recent model performance should never override official observations.
+
+# Forecast Accuracy Learning
+
+Historical forecast performance should be preserved.
+
+Every forecast should eventually be compared with the actual observation.
+
+The system should calculate:
+
+- Wind speed error
+- Wind direction error
+- Gust error
+- Wave height error
+- Wave period error
+
+Performance should be evaluated over:
+
+- 7 days
+- 30 days
+- 90 days
+- One year
+- Lifetime
+
+Historical performance should inform confidence but never replace current observations.
+
+# Station Representation
+
+Official weather stations represent conditions at their physical location.
+
+They do not necessarily represent conditions along the entire route.
+
+The Captain's Briefing should consider:
+
+- Distance from the station
+- Exposure
+- Geography
+- Fetch
+- Local effects
+
+When station observations differ significantly from captain reports, the difference should be explained rather than ignored.
+
+# Historical Database
+
+The platform should permanently preserve:
+
+Every official observation
+
+Every forecast model run
+
+Every captain report
+
+Every generated briefing
+
+Every completed crossing
+
+Every calculated forecast accuracy record
+
+Historical information should never be discarded unless corrupted.
+
+Historical data allows the system to improve through comparison with reality.
+
+# Evidence Weighting
+
+When forming an assessment, consider information in approximately this order:
+
+1. Official observations
+2. Official warnings
+3. Recent captain reports
+4. Wave observations
+5. Forecast models
+6. Historical model performance
+7. Historical local patterns
+
+Confidence should decrease whenever higher-priority evidence conflicts.
+
+The reasoning behind the assessment should always be explained.
+
+# Learning From Crossings
+
+Completed crossings provide valuable operational information.
+
+When available, crossing records should include:
+
+Departure time
+
+Arrival time
+
+Vessel type
+
+Passenger load
+
+Passenger comfort
+
+Observed sea state
+
+Average speed
+
+Captain observations
+
+Crossing records should eventually be used to improve route-specific understanding.
+
+Repeated patterns should become evidence.
+
+Single events should remain anecdotes.
+
+# Continuous Improvement
+
+The Captain's Briefing Generator should continually improve through observation and evidence.
+
+When historical data consistently demonstrates a pattern, that pattern may be incorporated into future analysis.
+
+Examples include:
+
+- Persistent model bias
+- Local wind acceleration zones
+- Residual sea-state behaviour
+- Seasonal weather tendencies
+- Frequently observed captain reports
+
+No new operational rule should be created from a single observation.
+
+Patterns should be supported by repeated evidence collected over time.
+
+The AI should always distinguish between:
+
+Observed fact
+
+Repeated pattern
+
+Historical tendency
+
+Forecast
+
+Inference
+
+Opinion
+
+The confidence assigned to each statement should reflect the strength of the supporting evidence.
+
