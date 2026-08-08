@@ -711,12 +711,168 @@
 
     }
 
+.route-status {
 
+  display: grid;
+
+  grid-template-columns:
+    1.3fr 1fr 1fr;
+
+  gap: 1px;
+
+  background:
+    var(--border);
+
+  border:
+    1px solid
+    var(--border);
+
+}
+
+
+.route-status-item {
+
+  background:
+    var(--panel);
+
+  padding:
+    22px;
+
+}
+
+
+.route-status-label {
+
+  color:
+    var(--muted);
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    .08em;
+
+  font-size:
+    .7rem;
+
+}
+
+
+.route-status-value {
+
+  margin-top:
+    5px;
+
+  color:
+    var(--cream);
+
+  font-size:
+    1.4rem;
+
+  font-weight:
+    bold;
+
+}
+
+
+.route-status-value.primary {
+
+  color:
+    var(--gold);
+
+  font-size:
+    2rem;
+
+}
+
+
+@media (max-width: 700px) {
+
+  .route-status {
+
+    grid-template-columns:
+      1fr;
+
+  }
+
+}
 
     /* ===============================
        MOBILE
     =============================== */
+.accuracy {
 
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 8px;
+  border: 1px solid #555;
+  font-size: .67rem;
+  letter-spacing: .09em;
+
+}
+
+.accuracy-good {
+
+  color: #81b78c;
+  border-color: #4d755a;
+
+}
+
+.accuracy-fair {
+
+  color: var(--gold-light);
+  border-color: var(--gold);
+
+}
+
+.accuracy-poor {
+
+  color: #d98989;
+  border-color: #8e5050;
+
+}
+
+.route-status {
+
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+
+}
+
+.route-status-item {
+
+  background: var(--panel);
+  padding: 22px;
+
+}
+
+.route-status-label {
+
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: .7rem;
+
+}
+
+.route-status-value {
+
+  margin-top: 5px;
+  color: var(--cream);
+  font-size: 1.4rem;
+  font-weight: bold;
+
+}
+
+.route-status-value.primary {
+
+  color: var(--gold);
+  font-size: 2rem;
+
+}
 
     @media (
       max-width: 700px
@@ -830,7 +986,29 @@
 
   </div>
 
+<div class="section-title">
 
+  <span>
+    Route Intelligence
+  </span>
+
+  <h2>
+    Current Route Assessment
+  </h2>
+
+</div>
+
+
+<div
+  id="routeStatus"
+  class="route-status"
+>
+
+  <div class="loading">
+    Loading current assessment...
+  </div>
+
+</div>
 
   <!-- ========================================
        OFFICIAL CONDITIONS
@@ -1534,7 +1712,55 @@ async function loadModelComparison() {
 
   }
 
+let accuracyLabel =
+  "Not enough data";
 
+let accuracyClass =
+  "";
+
+
+if (
+  difference !== null
+) {
+
+  const absoluteError =
+    Math.abs(
+      difference
+    );
+
+
+  if (
+    absoluteError <= 1
+  ) {
+
+    accuracyLabel =
+      "EXCELLENT MATCH";
+
+    accuracyClass =
+      "accuracy-good";
+
+  } else if (
+    absoluteError <= 3
+  ) {
+
+    accuracyLabel =
+      "GOOD MATCH";
+
+    accuracyClass =
+      "accuracy-fair";
+
+  } else {
+
+    accuracyLabel =
+      "LARGE DIFFERENCE";
+
+    accuracyClass =
+      "accuracy-poor";
+
+  }
+
+}
+    
   return `
 
     <article class="station">
@@ -1546,6 +1772,9 @@ async function loadModelComparison() {
 
       </div>
 
+<div class="accuracy ${accuracyClass}">
+  ${accuracyLabel}
+</div>
 
       <div class="metrics">
 
@@ -1885,6 +2114,118 @@ function renderReport(
 // BRIEFING
 // ======================================================
 
+  async function loadRouteStatus() {
+
+  const container =
+    document.getElementById(
+      "routeStatus"
+    );
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/.netlify/functions/captains-briefing"
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        "Route assessment unavailable"
+      );
+
+    }
+
+
+    const briefing =
+      data.briefing || {};
+
+
+    const confidence =
+      typeof briefing.confidence ===
+      "object"
+        ? briefing.confidence
+        : {
+            level:
+              briefing.confidence
+          };
+
+
+    container.innerHTML = `
+
+      <div class="route-status-item">
+
+        <div class="route-status-label">
+          Current Assessment
+        </div>
+
+        <div class="route-status-value primary">
+          ${safe(
+            briefing.assessment,
+            "UNKNOWN"
+          )}
+        </div>
+
+      </div>
+
+
+      <div class="route-status-item">
+
+        <div class="route-status-label">
+          Confidence
+        </div>
+
+        <div class="route-status-value">
+          ${safe(
+            confidence.level
+          )}
+        </div>
+
+      </div>
+
+
+      <div class="route-status-item">
+
+        <div class="route-status-label">
+          Updated
+        </div>
+
+        <div class="route-status-value">
+          ${formatTime(
+            data.generatedAt
+          )}
+        </div>
+
+      </div>
+
+    `;
+
+
+  } catch (error) {
+
+    container.innerHTML = `
+
+      <div class="route-status-item error">
+
+        Current route assessment
+        could not be loaded.
+
+      </div>
+
+    `;
+
+  }
+
+}
 
 async function loadBriefing() {
 
@@ -2064,6 +2405,8 @@ async function loadBriefing() {
 async function refreshDashboard() {
 
   await Promise.all([
+
+    loadRouteStatus(),
 
     loadStations(),
 
