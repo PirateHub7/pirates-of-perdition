@@ -4,69 +4,76 @@ export default async () => {
 
   try {
 
-    // --------------------------------------------------
-    // TEST MARINE DATA
-    // We will replace this with live marine data later.
-    // --------------------------------------------------
+    // =====================================================
+    // 1. GET LIVE OFFICIAL MARINE OBSERVATIONS
+    // =====================================================
 
-    const marineData = {
-      route: "Lasqueti Island ↔ French Creek",
-
-      observations: [
-        {
-          station: "Sisters Islets",
-          direction: "NW",
-          wind: 12,
-          gust: 16,
-          trend: "easing"
-        },
-        {
-          station: "Ballenas Island",
-          direction: "NW",
-          wind: 9,
-          gust: 12,
-          trend: "steady"
-        }
-      ],
-
-      forecast:
-        "Northwest winds diminishing through the afternoon.",
-
-      visibility: "Good",
-
-      seaState: "Moderate chop",
-
-      tideStage: "Falling"
-    };
-
-
-    // --------------------------------------------------
-    // GET CAPTAIN REPORTS
-    // --------------------------------------------------
-
-    const captainReports = await getRecentCaptainReports();
-
-
-    // --------------------------------------------------
-    // GENERATE BRIEFING
-    // --------------------------------------------------
-
-    const briefing = generateBriefing(
-      marineData,
-      captainReports
+    const marineResponse = await fetch(
+      "https://piratesofperdition.com/.netlify/functions/get-marine-data"
     );
+
+    if (!marineResponse.ok) {
+      throw new Error(
+        `Marine data request failed: ${marineResponse.status}`
+      );
+    }
+
+    const marineData = await marineResponse.json();
+
+    if (!marineData.success) {
+      throw new Error(
+        marineData.error ||
+        "Marine data unavailable."
+      );
+    }
+
+
+    const sisters =
+      marineData.observations?.sistersIslets || null;
+
+    const ballenas =
+      marineData.observations?.ballenasIsland || null;
+
+
+    // =====================================================
+    // 2. GET RECENT CAPTAIN REPORTS
+    // =====================================================
+
+    const captainReports =
+      await getRecentCaptainReports();
+
+
+    // =====================================================
+    // 3. BUILD THE BRIEFING
+    // =====================================================
+
+    const briefing =
+      generateBriefing(
+        sisters,
+        ballenas,
+        captainReports
+      );
 
 
     return Response.json({
+
       success: true,
-      generatedAt: new Date().toISOString(),
+
+      generatedAt:
+        new Date().toISOString(),
+
       briefing
+
     });
 
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Captain briefing error:",
+      error
+    );
+
 
     return Response.json(
       {
@@ -80,7 +87,7 @@ export default async () => {
 
   }
 
-}
+};
 
 
 
@@ -90,68 +97,86 @@ export default async () => {
 
 async function getRecentCaptainReports() {
 
-  const store = getStore("captain-reports");
+  const store =
+    getStore("captain-reports");
 
-  const { blobs } = await store.list();
+
+  const { blobs } =
+    await store.list();
+
 
   const reports = [];
 
 
   for (const blob of blobs) {
 
-    const report = await store.get(blob.key, {
-      type: "json"
-    });
+    const report =
+      await store.get(
+        blob.key,
+        {
+          type: "json"
+        }
+      );
+
 
     if (!report) {
       continue;
     }
 
 
-    // Ignore reports older than 6 hours
-
     const observedTime =
       report.observation?.timeObserved ||
       report.submittedAt;
 
 
-    const ageMilliseconds =
+    if (!observedTime) {
+      continue;
+    }
+
+
+    const age =
       Date.now() -
-      new Date(observedTime).getTime();
+      new Date(
+        observedTime
+      ).getTime();
 
 
     const sixHours =
       6 * 60 * 60 * 1000;
 
 
-    if (ageMilliseconds <= sixHours) {
+    if (age <= sixHours) {
 
-      reports.push(report);
+      reports.push(
+        report
+      );
 
     }
 
   }
 
 
-  // Newest reports first
+  reports.sort(
+    (a, b) => {
 
-  reports.sort((a, b) => {
+      const timeA =
+        new Date(
+          a.observation?.timeObserved ||
+          a.submittedAt
+        );
 
-    const timeA =
-      new Date(
-        a.observation?.timeObserved ||
-        a.submittedAt
-      );
 
-    const timeB =
-      new Date(
-        b.observation?.timeObserved ||
-        b.submittedAt
-      );
+      const timeB =
+        new Date(
+          b.observation?.timeObserved ||
+          b.submittedAt
+        );
 
-    return timeB - timeA;
 
-  });
+      return timeB - timeA;
+
+    }
+  );
 
 
   return reports;
@@ -165,121 +190,289 @@ async function getRecentCaptainReports() {
 // ======================================================
 
 function generateBriefing(
-  data,
+  sisters,
+  ballenas,
   captainReports
 ) {
 
-  const sisters =
-    data.observations.find(
-      station =>
-        station.station ===
-        "Sisters Islets"
-    );
+  const analysis = [];
 
 
-  const ballenas =
-    data.observations.find(
-      station =>
-        station.station ===
-        "Ballenas Island"
-    );
+  // ===================================================
+  // BASIC VALIDATION
+  // ===================================================
+
+  const sistersAvailable =
+    sisters?.available === true;
+
+  const ballenasAvailable =
+    ballenas?.available === true;
 
 
-  // --------------------------------------------------
-  // BASIC ASSESSMENT
-  // Temporary logic until AI analysis is connected.
-  // --------------------------------------------------
+  const sistersWind =
+    sistersAvailable
+      ? sisters.wind?.speedKnots
+      : null;
+
+
+  const ballenasWind =
+    ballenasAvailable
+      ? ballenas.wind?.speedKnots
+      : null;
+
+
+  const sistersDirection =
+    sistersAvailable
+      ? sisters.wind?.directionCardinal
+      : null;
+
+
+  const ballenasDirection =
+    ballenasAvailable
+      ? ballenas.wind?.directionCardinal
+      : null;
+
+
+  // ===================================================
+  // ASSESSMENT
+  //
+  // This is still a simple operational description.
+  // It is NOT a voyage limit.
+  // ===================================================
+
+  const validWindValues =
+    [
+      sistersWind,
+      ballenasWind
+    ]
+      .filter(
+        value =>
+          typeof value === "number"
+      );
+
 
   const highestWind =
-    Math.max(
-      sisters.wind,
-      ballenas.wind
-    );
+    validWindValues.length
+      ? Math.max(
+          ...validWindValues
+        )
+      : null;
 
 
   let assessment =
     "FAVOURABLE";
 
 
-  if (highestWind >= 10) {
-    assessment = "CAUTION";
+  if (
+    highestWind !== null &&
+    highestWind >= 10
+  ) {
+
+    assessment =
+      "CAUTION";
+
   }
-
-  if (highestWind >= 18) {
-    assessment = "CHALLENGING";
-  }
-
-  if (highestWind >= 25) {
-    assessment = "DEMANDING";
-  }
-
-  if (highestWind >= 35) {
-    assessment = "EXTREME";
-  }
-
-
-
-  // --------------------------------------------------
-  // ANALYSIS
-  // --------------------------------------------------
-
-  const analysis = [];
 
 
   if (
-    sisters.wind >
-    ballenas.wind + 3
+    highestWind !== null &&
+    highestWind >= 18
+  ) {
+
+    assessment =
+      "CHALLENGING";
+
+  }
+
+
+  if (
+    highestWind !== null &&
+    highestWind >= 25
+  ) {
+
+    assessment =
+      "DEMANDING";
+
+  }
+
+
+  if (
+    highestWind !== null &&
+    highestWind >= 35
+  ) {
+
+    assessment =
+      "EXTREME";
+
+  }
+
+
+  if (
+    highestWind === null
+  ) {
+
+    assessment =
+      "UNKNOWN";
+
+  }
+
+
+
+  // ===================================================
+  // ANALYSIS OF OFFICIAL OBSERVATIONS
+  // ===================================================
+
+  if (
+    sistersAvailable &&
+    ballenasAvailable
   ) {
 
     analysis.push(
-      "Wind observations are stronger at Sisters Islets than Ballenas Island, indicating uneven conditions across the route."
+      `Current official observations show ${sistersDirection || "unknown direction"} ${formatKnots(sistersWind)} at Sisters Islets and ${ballenasDirection || "unknown direction"} ${formatKnots(ballenasWind)} at Ballenas Island.`
     );
 
   }
 
 
   if (
-    sisters.trend === "easing"
+    sistersAvailable &&
+    ballenasAvailable &&
+    typeof sistersWind === "number" &&
+    typeof ballenasWind === "number"
+  ) {
+
+    const difference =
+      Math.abs(
+        sistersWind -
+        ballenasWind
+      );
+
+
+    if (
+      difference >= 4
+    ) {
+
+      analysis.push(
+        "Wind speeds differ noticeably between Sisters Islets and Ballenas Island, indicating uneven conditions across the route."
+      );
+
+    }
+
+  }
+
+
+  if (
+    sistersAvailable &&
+    ballenasAvailable &&
+    sistersDirection &&
+    ballenasDirection &&
+    sistersDirection !== ballenasDirection
   ) {
 
     analysis.push(
-      "Winds at Sisters Islets are currently easing."
+      "Wind direction differs between the two stations, suggesting localized wind behaviour across the Strait."
     );
 
   }
 
 
   if (
+    highestWind !== null &&
     highestWind >= 10
   ) {
 
     analysis.push(
-      "Moderate wind is present and exposed sections of the route may experience increased wave activity."
+      "Moderate wind is present at one or both official stations, so exposed sections of the route may experience increased vessel motion."
     );
 
   }
 
 
   if (
-    data.seaState !== "Calm"
+    highestWind !== null &&
+    highestWind < 10
   ) {
 
     analysis.push(
-      `Reported sea conditions are ${data.seaState.toLowerCase()}.`
+      "Official station winds are currently relatively light, although local sea state may still differ from the wind observations."
     );
 
   }
 
 
 
-  // --------------------------------------------------
-  // CAPTAIN REPORT SUMMARY
-  // --------------------------------------------------
+  // ===================================================
+  // GUST ANALYSIS
+  // ===================================================
+
+  const sistersGust =
+    sistersAvailable
+      ? sisters.wind?.gustKnots
+      : null;
+
+
+  const ballenasGust =
+    ballenasAvailable
+      ? ballenas.wind?.gustKnots
+      : null;
+
+
+  if (
+    typeof sistersWind === "number" &&
+    typeof sistersGust === "number" &&
+    sistersGust - sistersWind >= 5
+  ) {
+
+    analysis.push(
+      "Sisters Islets is reporting a notable gust spread, which may indicate variable or unstable wind."
+    );
+
+  }
+
+
+  if (
+    typeof ballenasWind === "number" &&
+    typeof ballenasGust === "number" &&
+    ballenasGust - ballenasWind >= 5
+  ) {
+
+    analysis.push(
+      "Ballenas Island is reporting a notable gust spread, which may affect vessel handling."
+    );
+
+  }
+
+
+
+  // ===================================================
+  // CAPTAIN REPORTS
+  // ===================================================
+
+  if (
+    captainReports.length === 1
+  ) {
+
+    analysis.push(
+      "One recent local captain report is available as supplementary on-water evidence."
+    );
+
+  }
+
+
+  if (
+    captainReports.length >= 2
+  ) {
+
+    analysis.push(
+      `${captainReports.length} recent local captain reports are available for comparison with the official observations.`
+    );
+
+  }
+
 
   const localReports =
-    captainReports.map(report => {
-
-      return {
+    captainReports.map(
+      report => ({
 
         reportId:
           report.reportId,
@@ -292,7 +485,8 @@ function generateBriefing(
           report.verified === true,
 
         observedAt:
-          report.observation?.timeObserved,
+          report.observation?.timeObserved ||
+          report.submittedAt,
 
         route:
           `${report.route?.from || "Unknown"} → ${report.route?.to || "Unknown"}`,
@@ -300,17 +494,6 @@ function generateBriefing(
         area:
           report.location?.area ||
           null,
-
-        vessel:
-          {
-            lengthFeet:
-              report.vessel?.lengthFeet ||
-              null,
-
-            type:
-              report.vessel?.type ||
-              null
-          },
 
         wind:
           report.observation?.wind ||
@@ -340,68 +523,53 @@ function generateBriefing(
           report.confidence?.captainConfidence ||
           null
 
-      };
-
-    });
-
-
-
-  // --------------------------------------------------
-  // LOCAL REPORT ANALYSIS
-  // --------------------------------------------------
-
-  if (
-    captainReports.length === 1
-  ) {
-
-    analysis.push(
-      "One recent local captain report is available and should be treated as supplementary evidence."
+      })
     );
 
-  }
 
 
-  if (
-    captainReports.length >= 2
-  ) {
-
-    analysis.push(
-      `${captainReports.length} recent captain reports are available for comparison with instrument observations and forecasts.`
-    );
-
-  }
-
-
-
-  // --------------------------------------------------
+  // ===================================================
   // CONFIDENCE
-  // --------------------------------------------------
+  // ===================================================
 
   let confidence =
     "HIGH";
 
+
   let confidenceReason =
-    "Current station observations are reasonably consistent.";
+    "Official station observations are current and available.";
+
 
   if (
+    !sistersAvailable ||
+    !ballenasAvailable
+  ) {
+
+    confidence =
+      "MODERATE";
+
+    confidenceReason =
+      "One or more official station observations are unavailable.";
+
+  }
+
+
+  if (
+    sistersAvailable &&
+    ballenasAvailable &&
+    typeof sistersWind === "number" &&
+    typeof ballenasWind === "number" &&
     Math.abs(
-      sisters.wind -
-      ballenas.wind
+      sistersWind -
+      ballenasWind
     ) >= 5
   ) {
 
     confidence =
       "MODERATE";
-    confidenceReason =
-    "Wind observations differ noticeably between Sisters Islets and Ballenas Island.";
-  }
-
-  if (
-    captainReports.length === 0
-  ) {
 
     confidenceReason =
-      "No recent local captain reports are available.";
+      "Official station winds differ significantly across the route.";
 
   }
 
@@ -411,15 +579,15 @@ function generateBriefing(
   ) {
 
     confidenceReason +=
-      ` ${captainReports.length} recent local captain report${captainReports.length === 1 ? "" : "s"} are available.`;
+      ` ${captainReports.length} recent local captain report${captainReports.length === 1 ? "" : "s"} ${captainReports.length === 1 ? "is" : "are"} available.`;
 
   }
 
 
 
-  // --------------------------------------------------
+  // ===================================================
   // RETURN BRIEFING
-  // --------------------------------------------------
+  // ===================================================
 
   return {
 
@@ -427,33 +595,66 @@ function generateBriefing(
       "Captain's Briefing",
 
     route:
-      data.route,
+      "Lasqueti Island ↔ French Creek",
 
     assessment,
 
     currentConditions: {
 
       sistersIslets:
-        `${sisters.direction} ${sisters.wind} kt, gusting ${sisters.gust} kt`,
+        sistersAvailable
+          ? {
+              wind:
+                `${sistersDirection || "—"} ${formatKnots(sistersWind)}`,
+
+              gust:
+                formatKnots(
+                  sistersGust
+                ),
+
+              observedAt:
+                sisters.observedAt,
+
+              temperatureC:
+                sisters.airTemperatureC,
+
+              pressureKpa:
+                sisters.pressureKpa
+            }
+          : null,
+
 
       ballenasIsland:
-        `${ballenas.direction} ${ballenas.wind} kt, gusting ${ballenas.gust} kt`,
+        ballenasAvailable
+          ? {
+              wind:
+                `${ballenasDirection || "—"} ${formatKnots(ballenasWind)}`,
 
-      visibility:
-        data.visibility,
+              gust:
+                formatKnots(
+                  ballenasGust
+                ),
 
-      seaState:
-        data.seaState,
+              observedAt:
+                ballenas.observedAt,
 
-      tide:
-        data.tideStage
+              temperatureC:
+                ballenas.airTemperatureC,
+
+              pressureKpa:
+                ballenas.pressureKpa
+            }
+          : null
 
     },
 
+
     forecast:
-      data.forecast,
+      "Forecast model integration is pending. This briefing currently reflects official live observations and recent captain reports.",
+
 
     analysis,
+
 
     localCaptainReports: {
 
@@ -465,6 +666,7 @@ function generateBriefing(
 
     },
 
+
     confidence: {
 
       level:
@@ -475,9 +677,63 @@ function generateBriefing(
 
     },
 
+
+    sources: [
+
+      {
+        type:
+          "Official Observation",
+
+        source:
+          "Environment and Climate Change Canada",
+
+        stations: [
+          "Sisters Islets",
+          "Ballenas Island"
+        ]
+      },
+
+      {
+        type:
+          "Captain Reports",
+
+        count:
+          localReports.length
+      }
+
+    ],
+
+
     disclaimer:
-      "This briefing is intended to assist voyage planning. It is not a navigation aid and does not determine whether a voyage is safe or appropriate. Vessel capability, loading, crew experience, passenger considerations, equipment and changing local conditions remain the responsibility of the vessel's master."
+      "This briefing is intended to assist voyage planning. It is not a navigation aid and does not determine whether a voyage is safe or appropriate. Conditions can change rapidly. Vessel capability, loading, crew experience, passenger considerations, equipment and the final decision to operate remain the responsibility of the vessel's master."
 
   };
+
+}
+
+
+
+// ======================================================
+// HELPERS
+// ======================================================
+
+function formatKnots(
+  value
+) {
+
+  if (
+    value === null ||
+    value === undefined ||
+    Number.isNaN(
+      Number(value)
+    )
+  ) {
+
+    return "—";
+
+  }
+
+
+  return `${Number(value).toFixed(1)} kt`;
 
 }
