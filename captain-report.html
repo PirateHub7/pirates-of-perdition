@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Captain Report | Pirates of Perdition</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #0b0d0e;
+      color: #eee5d2;
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.5;
+    }
+
+    .page {
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 30px 16px 70px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .eyebrow {
+      color: #c9a24d;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.8rem;
+    }
+
+    h1 {
+      margin: 8px 0 10px;
+      font-size: clamp(2.3rem, 8vw, 4rem);
+      text-transform: uppercase;
+    }
+
+    .intro {
+      max-width: 650px;
+      margin: 0 auto;
+      color: #c9c3b6;
+    }
+
+    .notice {
+      margin: 30px 0;
+      padding: 18px;
+      border-left: 4px solid #c9a24d;
+      background: #15191a;
+      color: #d9d3c7;
+    }
+
+    form {
+      display: grid;
+      gap: 25px;
+    }
+
+    fieldset {
+      border: 1px solid #55492f;
+      background: #111516;
+      padding: 22px;
+      margin: 0;
+    }
+
+    legend {
+      color: #c9a24d;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      color: #ddd4c2;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #4d4f4e;
+      background: #090b0c;
+      color: #ffffff;
+      font: inherit;
+      border-radius: 3px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid #c9a24d;
+      border-color: transparent;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .checkbox-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .checkbox-row label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+    }
+
+    .checkbox-row input {
+      width: auto;
+    }
+
+    .submit-button {
+      border: 1px solid #c9a24d;
+      background: #c9a24d;
+      color: #111;
+      padding: 15px 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .submit-button:hover {
+      background: #e0bb63;
+    }
+
+    .status {
+      display: none;
+      padding: 18px;
+      margin-top: 20px;
+      background: #152019;
+      border: 1px solid #496752;
+    }
+
+    .footer-note {
+      margin-top: 30px;
+      color: #9e9a91;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    @media (max-width: 650px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      fieldset {
+        padding: 18px 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <header class="header">
+      <div class="eyebrow">Captain's Briefing Network</div>
+
+      <h1>Submit a Captain Report</h1>
+
+      <p class="intro">
+        Share actual conditions observed on the water.
+        Recent local reports help strengthen the Captain's Briefing
+        and provide other operators with better situational awareness.
+      </p>
+    </header>
+
+    <div class="notice">
+      <strong>Report only what you actually observed.</strong><br>
+      Estimates are welcome when clearly identified as estimates.
+      Captain reports supplement official marine forecasts and observations;
+      they do not replace them.
+    </div>
+
+
+    <form id="captainReportForm">
+
+      <!-- CAPTAIN -->
+
+      <fieldset>
+        <legend>Captain</legend>
+
+        <div class="grid">
+
+          <div>
+            <label for="captainName">Captain Name</label>
+            <input
+              type="text"
+              id="captainName"
+              name="captainName"
+              required
+            >
+          </div>
+
+          <div>
+            <label for="operatorType">Operator Type</label>
+
+            <select id="operatorType" name="operatorType" required>
+              <option value="">Select</option>
+              <option>Commercial operator</option>
+              <option>Water taxi</option>
+              <option>Charter operator</option>
+              <option>Fishing vessel</option>
+              <option>Recreational operator</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+        </div>
+      </fieldset>
+
+
+      <!-- ROUTE -->
+
+      <fieldset>
+        <legend>Voyage</legend>
+
+        <div class="grid">
+
+          <div>
+            <label for="from">Departed From</label>
+            <input
+              type="text"
+              id="from"
+              name="from"
+              placeholder="French Creek"
+              required
+            >
+          </div>
+
+          <div>
+            <label for="to">Destination</label>
+            <input
+              type="text"
+              id="to"
+              name="to"
+              placeholder="Lasqueti Island"
+              required
+            >
+          </div>
+
+          <div>
+            <label for="timeObserved">Observation Time</label>
+            <input
+              type="datetime-local"
+              id="timeObserved"
+              name="timeObserved"
+              required
+            >
+          </div>
+
+          <div>
+            <label for="area">Area Observed</label>
+            <input
+              type="text"
+              id="area"
+              name="area"
+              placeholder="French Creek to mid-Strait"
+              required
+            >
+          </div>
+
+        </div>
+      </fieldset>
+
+
+      <!-- VESSEL -->
+
+      <fieldset>
+        <legend>Vessel</legend>
+
+        <div class="grid">
+
+          <div>
+            <label for="vesselLength">Length (feet)</label>
+
+            <input
+              type="number"
+              id="vesselLength"
+              name="vesselLength"
+              min="1"
+              max="300"
+              step="1"
+            >
+          </div>
+
+          <div>
+            <label for="vesselType">Vessel Type</label>
+
+            <select id="vesselType" name="vesselType">
+              <option value="">Select</option>
+              <option>Open powerboat</option>
+              <option>Enclosed powerboat</option>
+              <option>RIB</option>
+              <option>Fishing vessel</option>
+              <option>Sailboat</option>
+              <option>Passenger vessel</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+        </div>
+      </fieldset>
+
+
+      <!-- WIND -->
+
+      <fieldset>
+        <legend>Wind</legend>
+
+        <div class="grid">
+
+          <div>
+            <label for="windDirection">Direction</label>
+
+            <select id="windDirection" name="windDirection">
+              <option value="">Unknown</option>
+              <option>N</option>
+              <option>NE</option>
+              <option>E</option>
+              <option>SE</option>
+              <option>S</option>
+              <option>SW</option>
+              <option>W</option>
+              <option>NW</option>
+              <option>Variable</option>
+              <option>Calm</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="windSpeed">Sustained Wind (knots)</label>
+
+            <input
+              type="number"
+              id="windSpeed"
+              name="windSpeed"
+              min="0"
+              max="100"
+              step="1"
+            >
+          </div>
+
+          <div>
+            <label for="gustSpeed">Estimated Gusts (knots)</label>
+
+            <input
+              type="number"
+              id="gustSpeed"
+              name="gustSpeed"
+              min="0"
+              max="120"
+              step="1"
+            >
+          </div>
+
+          <div>
+            <label for="windTrend">Wind Trend</label>
+
+            <select id="windTrend" name="windTrend">
+              <option value="">Unknown</option>
+              <option>Building</option>
+              <option>Steady</option>
+              <option>Easing</option>
+              <option>Variable</option>
+            </select>
+          </div>
+
+          <div class="full checkbox-row">
+
+            <label>
+              <input
+                type="checkbox"
+                id="windEstimated"
+                name="windEstimated"
+              >
+              Wind values are estimated
+            </label>
+
+          </div>
+
+        </div>
+      </fieldset>
+
+
+      <!-- SEA STATE -->
+
+      <fieldset>
+        <legend>Sea State</legend>
+
+        <div class="grid">
+
+          <div>
+            <label for="seaState">Observed Sea State</label>
+
+            <select id="seaState" name="seaState" required>
+              <option value="">Select</option>
+              <option>Calm</option>
+              <option>Light chop</option>
+              <option>Moderate chop</option>
+              <option>Short steep chop</option>
+              <option>Moderate swell</option>
+              <option>Large swell</option>
+              <option>Confused sea</option>
+              <option>Breaking seas</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="waveHeight">Estimated Wave Height</label>
+
+            <select id="waveHeight" name="waveHeight">
+              <option value="">Unknown</option>
+              <option>Less than 1 ft</option>
+              <option>1-2 ft</option>
+              <option>2-3 ft</option>
+              <option>3-4 ft</option>
+              <option>4-6 ft</option>
+              <option>6-8 ft</option>
+              <option>8+ ft</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="waveDirection">Wave Direction</label>
+
+            <select id="waveDirection" name="waveDirection">
+              <option value="">Unknown</option>
+              <option>N</option>
+              <option>NE</option>
+              <option>E</option>
+              <option>SE</option>
+              <option>S</option>
+              <option>SW</option>
+              <option>W</option>
+              <option>NW</option>
+              <option>Mixed</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="rideQuality">Ride Quality</label>
+
+            <select id="rideQuality" name="rideQuality">
+              <option value="">Select</option>
+              <option>Smooth</option>
+              <option>Slightly active</option>
+              <option>Moderate</option>
+              <option>Rough</option>
+              <option>Very rough</option>
+            </select>
+          </div>
+
+          <div class="full checkbox-row">
+
+            <label>
+              <input
+                type="checkbox"
+                id="confusedSea"
+                name="confusedSea"
+              >
+              Confused sea
+            </label>
+
+            <label>
+              <input
+                type="checkbox"
+                id="breakingWaves"
+                name="breakingWaves"
+              >
+              Breaking waves observed
+            </label>
+
+          </div>
+
+        </div>
+      </fieldset>
+
+
+      <!-- VISIBILITY -->
+
+      <fieldset>
+        <legend>Visibility & Weather</legend>
+
+        <div class="grid">
+
+          <div>
+            <label for="visibility">Visibility</label>
+
+            <select id="visibility" name="visibility">
+              <option value="">Select</option>
+              <option>Excellent</option>
+              <option>Good</option>
+              <option>Moderate</option>
+              <option>Poor</option>
+              <option>Very poor</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="precipitation">Precipitation</label>
+
+            <select id="precipitation" name="precipitation">
+              <option>None</option>
+              <option>Light rain</option>
+              <option>Heavy rain</option>
+              <option>Snow</option>
+              <option>Mixed</option>
+            </select>
+          </div>
+
+        </div>
+      </fieldset>
+
+
+      <!-- OPERATIONAL -->
+
+      <fieldset>
+        <legend>Operational Observations</legend>
+
+        <div class="grid">
+
+          <div>
+            <label for="passengerComfort">Passenger Comfort</label>
+
+            <select id="passengerComfort" name="passengerComfort">
+              <option value="">Not applicable / unknown</option>
+              <option>Comfortable</option>
+              <option>Some motion</option>
+              <option>Reduced comfort</option>
+              <option>Significant discomfort</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="speedImpact">Effect on Vessel Speed</label>
+
+            <select id="speedImpact" name="speedImpact">
+              <option value="">Unknown</option>
+              <option>No reduction required</option>
+              <option>Slight speed reduction</option>
+              <option>Moderate speed reduction</option>
+              <option>Significant speed reduction</option>
+            </select>
+          </div>
+
+          <div class="full">
+            <label for="notes">Captain's Notes</label>
+
+            <textarea
+              id="notes"
+              name="notes"
+              placeholder="Example: Roughest during the first five miles outside French Creek. Conditions became more organized approaching Sisters."
+            ></textarea>
+          </div>
+
+        </div>
+      </fieldset>
+
+
+      <!-- CONFIDENCE -->
+
+      <fieldset>
+        <legend>Report Confidence</legend>
+
+        <label for="captainConfidence">
+          How confident are you in your observations?
+        </label>
+
+        <select
+          id="captainConfidence"
+          name="captainConfidence"
+          required
+        >
+          <option value="">Select</option>
+          <option>HIGH</option>
+          <option>MODERATE</option>
+          <option>LOW</option>
+        </select>
+
+      </fieldset>
+
+
+      <button class="submit-button" type="submit">
+        Submit Captain Report
+      </button>
+
+    </form>
+
+
+    <div id="status" class="status"></div>
+
+
+    <div class="footer-note">
+      Captain reports are supplementary observations and are not official
+      marine forecasts, navigation information, or voyage instructions.
+    </div>
+
+  </main>
+
+
+  <script>
+
+    const form = document.getElementById("captainReportForm");
+    const statusBox = document.getElementById("status");
+
+
+    form.addEventListener("submit", async function(event) {
+
+      event.preventDefault();
+
+
+      const report = {
+
+        submittedAt: new Date().toISOString(),
+
+        captain: {
+          name: document.getElementById("captainName").value,
+          operatorType: document.getElementById("operatorType").value
+        },
+
+        route: {
+          from: document.getElementById("from").value,
+          to: document.getElementById("to").value
+        },
+
+        location: {
+          area: document.getElementById("area").value
+        },
+
+        vessel: {
+          lengthFeet:
+            Number(document.getElementById("vesselLength").value) || null,
+
+          type:
+            document.getElementById("vesselType").value || null
+        },
+
+        observation: {
+
+          timeObserved:
+            document.getElementById("timeObserved").value,
+
+          wind: {
+
+            direction:
+              document.getElementById("windDirection").value || null,
+
+            speedKnots:
+              Number(document.getElementById("windSpeed").value) || null,
+
+            gustKnots:
+              Number(document.getElementById("gustSpeed").value) || null,
+
+            trend:
+              document.getElementById("windTrend").value || null,
+
+            estimated:
+              document.getElementById("windEstimated").checked
+          },
+
+          seaState: {
+
+            category:
+              document.getElementById("seaState").value,
+
+            estimatedWaveHeight:
+              document.getElementById("waveHeight").value || null,
+
+            waveDirection:
+              document.getElementById("waveDirection").value || null,
+
+            confusedSea:
+              document.getElementById("confusedSea").checked,
+
+            breakingWaves:
+              document.getElementById("breakingWaves").checked
+          },
+
+          visibility:
+            document.getElementById("visibility").value || null,
+
+          precipitation:
+            document.getElementById("precipitation").value,
+
+          rideQuality:
+            document.getElementById("rideQuality").value || null,
+
+          passengerComfort:
+            document.getElementById("passengerComfort").value || null,
+
+          speedImpact:
+            document.getElementById("speedImpact").value || null,
+
+          notes:
+            document.getElementById("notes").value.trim()
+        },
+
+        confidence: {
+          captainConfidence:
+            document.getElementById("captainConfidence").value
+        }
+      };
+
+
+      console.log("Captain Report:", report);
+
+
+      statusBox.style.display = "block";
+
+      statusBox.innerHTML = `
+        <strong>Report prepared successfully.</strong><br>
+        The submission system has not been connected yet,
+        so this report has only been created locally in your browser.
+      `;
+
+    });
+
+  </script>
+
+</body>
+</html>
