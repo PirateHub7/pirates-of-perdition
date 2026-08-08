@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Captain's Weather Center | Pirates of Perdition
+  </title>
+
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+
+    :root {
+
+      --black: #080b0c;
+      --panel: #101516;
+      --panel-light: #151c1e;
+
+      --gold: #c9a24d;
+      --gold-light: #e2bd68;
+
+      --cream: #eee5d2;
+      --muted: #aaa397;
+
+      --border: #55492f;
+
+    }
+
+
+    body {
+
+      margin: 0;
+
+      background:
+        linear-gradient(
+          180deg,
+          #080b0c,
+          #0d1112
+        );
+
+      color: var(--cream);
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      line-height: 1.5;
+
+    }
+
+
+    a {
+      color: inherit;
+    }
+
+
+    .page {
+
+      max-width: 1200px;
+
+      margin: 0 auto;
+
+      padding:
+        30px 18px
+        80px;
+
+    }
+
+
+    /* ===============================
+       HEADER
+    =============================== */
+
+
+    .header {
+
+      text-align: center;
+
+      padding:
+        25px 10px
+        40px;
+
+    }
+
+
+    .eyebrow {
+
+      color: var(--gold);
+
+      text-transform: uppercase;
+
+      letter-spacing: .22em;
+
+      font-size: .78rem;
+
+      margin-bottom: 8px;
+
+    }
+
+
+    h1 {
+
+      margin: 0;
+
+      font-size:
+        clamp(
+          2.6rem,
+          7vw,
+          5rem
+        );
+
+      text-transform: uppercase;
+
+      letter-spacing: .04em;
+
+    }
+
+
+    .subtitle {
+
+      max-width: 720px;
+
+      margin:
+        15px auto
+        0;
+
+      color: var(--muted);
+
+    }
+
+
+    .live-line {
+
+      margin-top: 20px;
+
+      font-size: .85rem;
+
+      color: var(--gold-light);
+
+    }
+
+
+    .live-dot {
+
+      display: inline-block;
+
+      width: 8px;
+      height: 8px;
+
+      border-radius: 50%;
+
+      background: #64a875;
+
+      margin-right: 7px;
+
+    }
+
+
+
+    /* ===============================
+       NAVIGATION
+    =============================== */
+
+
+    .quick-links {
+
+      display: flex;
+
+      justify-content: center;
+
+      gap: 12px;
+
+      flex-wrap: wrap;
+
+      margin-bottom: 35px;
+
+    }
+
+
+    .button {
+
+      display: inline-block;
+
+      padding:
+        11px 18px;
+
+      border:
+        1px solid
+        var(--gold);
+
+      text-decoration: none;
+
+      text-transform: uppercase;
+
+      letter-spacing: .08em;
+
+      font-size: .76rem;
+
+      transition: .2s;
+
+    }
+
+
+    .button:hover {
+
+      background:
+        var(--gold);
+
+      color:
+        #111;
+
+    }
+
+
+    .button.primary {
+
+      background:
+        var(--gold);
+
+      color:
+        #111;
+
+    }
+
+
+
+    /* ===============================
+       SECTION
+    =============================== */
+
+
+    .section-title {
+
+      margin-top: 45px;
+
+      margin-bottom: 18px;
+
+      padding-bottom: 9px;
+
+      border-bottom:
+        1px solid
+        var(--border);
+
+    }
+
+
+    .section-title span {
+
+      color:
+        var(--gold);
+
+      font-size:
+        .75rem;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .16em;
+
+    }
+
+
+    .section-title h2 {
+
+      margin:
+        3px 0 0;
+
+      font-size:
+        1.7rem;
+
+    }
+
+
+
+    /* ===============================
+       STATIONS
+    =============================== */
+
+
+    .station-grid {
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0,1fr)
+        );
+
+      gap: 20px;
+
+    }
+
+
+    .station {
+
+      background:
+        var(--panel);
+
+      border:
+        1px solid
+        var(--border);
+
+      padding:
+        25px;
+
+    }
+
+
+    .station-header {
+
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      gap: 15px;
+
+      align-items:
+        start;
+
+    }
+
+
+    .station-name {
+
+      color:
+        var(--gold);
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .08em;
+
+      font-size:
+        .82rem;
+
+    }
+
+
+    .official {
+
+      font-size:
+        .68rem;
+
+      border:
+        1px solid
+        #4d755a;
+
+      color:
+        #81b78c;
+
+      padding:
+        4px 7px;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .07em;
+
+    }
+
+
+    .wind {
+
+      margin-top:
+        22px;
+
+    }
+
+
+    .wind-main {
+
+      font-size:
+        clamp(
+          2.5rem,
+          7vw,
+          4rem
+        );
+
+      line-height:
+        1;
+
+      font-weight:
+        bold;
+
+    }
+
+
+    .wind-main span {
+
+      color:
+        var(--gold);
+
+    }
+
+
+    .gust {
+
+      color:
+        var(--muted);
+
+      margin-top:
+        7px;
+
+    }
+
+
+    .metrics {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          2,
+          1fr
+        );
+
+      gap:
+        12px;
+
+      margin-top:
+        25px;
+
+    }
+
+
+    .metric {
+
+      background:
+        var(--panel-light);
+
+      padding:
+        12px;
+
+      border:
+        1px solid
+        #283032;
+
+    }
+
+
+    .metric-label {
+
+      color:
+        var(--muted);
+
+      font-size:
+        .72rem;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        .07em;
+
+    }
+
+
+    .metric-value {
+
+      margin-top:
+        3px;
+
+      font-size:
+        1.1rem;
+
+    }
+
+
+    .observed {
+
+      margin-top:
+        18px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        .8rem;
+
+    }
+
+
+
+    /* ===============================
+       CAPTAIN REPORTS
+    =============================== */
+
+
+    .reports {
+
+      display:
+        grid;
+
+      gap:
+        15px;
+
+    }
+
+
+    .report {
+
+      background:
+        var(--panel);
+
+      border-left:
+        3px solid
+        var(--gold);
+
+      padding:
+        20px;
+
+    }
+
+
+    .report-top {
+
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      gap:
+        15px;
+
+    }
+
+
+    .report-captain {
+
+      font-size:
+        1.1rem;
+
+      font-weight:
+        bold;
+
+    }
+
+
+    .report-route {
+
+      color:
+        var(--gold);
+
+      margin-top:
+        4px;
+
+    }
+
+
+    .report-time {
+
+      color:
+        var(--muted);
+
+      font-size:
+        .78rem;
+
+    }
+
+
+    .report-details {
+
+      margin-top:
+        14px;
+
+      color:
+        #d5cdbc;
+
+    }
+
+
+
+    /* ===============================
+       BRIEFING
+    =============================== */
+
+
+    .briefing {
+
+      background:
+        var(--panel);
+
+      border:
+        1px solid
+        var(--border);
+
+      padding:
+        25px;
+
+    }
+
+
+    .assessment {
+
+      display:
+        inline-block;
+
+      color:
+        var(--gold);
+
+      border:
+        1px solid
+        var(--gold);
+
+      padding:
+        6px 10px;
+
+      font-size:
+        .77rem;
+
+      letter-spacing:
+        .12em;
+
+      margin-bottom:
+        15px;
+
+    }
+
+
+    .briefing p {
+
+      margin:
+        10px 0;
+
+    }
+
+
+    .confidence {
+
+      margin-top:
+        20px;
+
+      padding-top:
+        15px;
+
+      border-top:
+        1px solid
+        #303638;
+
+      color:
+        var(--muted);
+
+    }
+
+
+
+    /* ===============================
+       SOURCE FOOTER
+    =============================== */
+
+
+    .source-note {
+
+      margin-top:
+        45px;
+
+      padding:
+        20px;
+
+      border-top:
+        1px solid
+        var(--border);
+
+      color:
+        var(--muted);
+
+      font-size:
+        .8rem;
+
+      text-align:
+        center;
+
+    }
+
+
+    .loading {
+
+      color:
+        var(--muted);
+
+      font-style:
+        italic;
+
+    }
+
+
+    .error {
+
+      color:
+        #d98989;
+
+    }
+
+
+
+    /* ===============================
+       MOBILE
+    =============================== */
+
+
+    @media (
+      max-width: 700px
+    ) {
+
+      .station-grid {
+        grid-template-columns:
+          1fr;
+      }
+
+
+      .metrics {
+
+        grid-template-columns:
+          repeat(
+            2,
+            1fr
+          );
+
+      }
+
+
+      .report-top {
+
+        flex-direction:
+          column;
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+
+<body>
+
+
+<main class="page">
+
+
+  <header class="header">
+
+    <div class="eyebrow">
+
+      Pirates of Perdition
+
+    </div>
+
+
+    <h1>
+
+      Captain's Weather Center
+
+    </h1>
+
+
+    <p class="subtitle">
+
+      Live marine observations, local captain reports
+      and operational intelligence for the
+      Lasqueti Island ↔ French Creek route.
+
+    </p>
+
+
+    <div class="live-line">
+
+      <span class="live-dot"></span>
+
+      Live marine data
+
+      ·
+
+      <span id="lastRefresh">
+        loading
+      </span>
+
+    </div>
+
+  </header>
+
+
+
+  <div class="quick-links">
+
+    <a
+      href="index.html"
+      class="button"
+    >
+      Home
+    </a>
+
+
+    <a
+      href="captain-report.html"
+      class="button primary"
+    >
+      Submit Captain Report
+    </a>
+
+
+    <a
+      href="captains-log.html"
+      class="button"
+    >
+      Captain's Log
+    </a>
+
+  </div>
+
+
+
+  <!-- ========================================
+       OFFICIAL CONDITIONS
+  ========================================= -->
+
+
+  <div class="section-title">
+
+    <span>
+      Environment Canada
+    </span>
+
+    <h2>
+      Official Observations
+    </h2>
+
+  </div>
+
+
+  <div
+    id="stationGrid"
+    class="station-grid"
+  >
+
+    <div class="station loading">
+      Loading Sisters Islets...
+    </div>
+
+    <div class="station loading">
+      Loading Ballenas Island...
+    </div>
+
+  </div>
+
+
+
+  <!-- ========================================
+       CAPTAIN REPORTS
+  ========================================= -->
+
+
+  <div class="section-title">
+
+    <span>
+      On the Water
+    </span>
+
+    <h2>
+      Recent Captain Reports
+    </h2>
+
+  </div>
+
+
+  <div
+    id="captainReports"
+    class="reports"
+  >
+
+    <div class="loading">
+
+      Loading local observations...
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ========================================
+       CAPTAIN BRIEFING
+  ========================================= -->
+
+
+  <div class="section-title">
+
+    <span>
+      Marine Intelligence
+    </span>
+
+    <h2>
+      Captain's Briefing
+    </h2>
+
+  </div>
+
+
+  <div
+    id="briefing"
+    class="briefing"
+  >
+
+    <div class="loading">
+
+      Generating current briefing...
+
+    </div>
+
+  </div>
+
+
+
+  <div class="source-note">
+
+    Official station observations are supplied by
+    Environment and Climate Change Canada.
+
+    <br><br>
+
+    Captain reports are supplementary observations
+    submitted by vessel operators and are not official
+    government observations.
+
+    <br><br>
+
+    This dashboard is intended to support voyage planning.
+    Conditions can change rapidly and the final decision
+    to operate remains with the vessel's master.
+
+  </div>
+
+
+</main>
+
+
+
+<script>
+
+
+// ======================================================
+// FORMATTERS
+// ======================================================
+
+
+function safe(
+  value,
+  fallback = "—"
+) {
+
+  return (
+    value === null ||
+    value === undefined ||
+    value === ""
+  )
+    ? fallback
+    : value;
+
+}
+
+
+
+function formatTime(
+  iso
+) {
+
+  if (!iso) {
+    return "Unknown";
+  }
+
+
+  const date =
+    new Date(iso);
+
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+
+    return iso;
+
+  }
+
+
+  return date.toLocaleString(
+    "en-CA",
+    {
+      timeZone:
+        "America/Vancouver",
+
+      month:
+        "short",
+
+      day:
+        "numeric",
+
+      hour:
+        "numeric",
+
+      minute:
+        "2-digit"
+    }
+  );
+
+}
+
+
+
+function timeAgo(
+  iso
+) {
+
+  if (!iso) {
+    return "";
+  }
+
+
+  const date =
+    new Date(iso);
+
+
+  const minutes =
+    Math.round(
+      (
+        Date.now() -
+        date.getTime()
+      ) /
+      60000
+    );
+
+
+  if (minutes < 1) {
+    return "just now";
+  }
+
+
+  if (minutes < 60) {
+    return `${minutes} min ago`;
+  }
+
+
+  const hours =
+    Math.round(
+      minutes / 60
+    );
+
+
+  return `${hours} hr ago`;
+
+}
+
+
+
+// ======================================================
+// MARINE STATIONS
+// ======================================================
+
+
+async function loadStations() {
+
+  const container =
+    document.getElementById(
+      "stationGrid"
+    );
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/.netlify/functions/get-marine-data"
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Marine data unavailable"
+      );
+
+    }
+
+
+    const stations =
+      Object.values(
+        data.observations || {}
+      );
+
+
+    container.innerHTML =
+      stations
+        .map(
+          station =>
+            renderStation(
+              station
+            )
+        )
+        .join("");
+
+
+    document.getElementById(
+      "lastRefresh"
+    ).textContent =
+      "updated " +
+      new Date()
+        .toLocaleTimeString(
+          "en-CA",
+          {
+            hour:
+              "numeric",
+
+            minute:
+              "2-digit"
+          }
+        );
+
+
+  } catch (error) {
+
+    container.innerHTML = `
+
+      <div class="station error">
+
+        Official observations
+        could not be loaded.
+
+        <br><br>
+
+        ${error.message}
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+
+function renderStation(
+  station
+) {
+
+  if (
+    !station.available
+  ) {
+
+    return `
+
+      <article class="station">
+
+        <div class="station-name">
+
+          ${safe(
+            station.station
+          )}
+
+        </div>
+
+        <p class="error">
+
+          Observation unavailable.
+
+        </p>
+
+      </article>
+
+    `;
+
+  }
+
+
+  const wind =
+    station.wind || {};
+
+
+  return `
+
+    <article class="station">
+
+
+      <div class="station-header">
+
+        <div>
+
+          <div class="station-name">
+
+            ${safe(
+              station.station
+            )}
+
+          </div>
+
+        </div>
+
+
+        <div class="official">
+
+          Official
+
+        </div>
+
+      </div>
+
+
+
+      <div class="wind">
+
+        <div class="wind-main">
+
+          <span>
+
+            ${safe(
+              wind.directionCardinal
+            )}
+
+          </span>
+
+          ${safe(
+            wind.speedKnots
+          )}
+
+          <small>
+            kt
+          </small>
+
+        </div>
+
+
+        <div class="gust">
+
+          Gusting
+
+          ${safe(
+            wind.gustKnots
+          )}
+
+          kt
+
+          ·
+
+          ${safe(
+            wind.directionDegrees
+          )}°
+
+        </div>
+
+      </div>
+
+
+
+      <div class="metrics">
+
+
+        <div class="metric">
+
+          <div class="metric-label">
+
+            Temperature
+
+          </div>
+
+          <div class="metric-value">
+
+            ${safe(
+              station.airTemperatureC
+            )} °C
+
+          </div>
+
+        </div>
+
+
+
+        <div class="metric">
+
+          <div class="metric-label">
+
+            Pressure
+
+          </div>
+
+          <div class="metric-value">
+
+            ${safe(
+              station.pressureKpa
+            )} kPa
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+
+      <div class="observed">
+
+        Observed:
+
+        ${formatTime(
+          station.observedAt
+        )}
+
+        ·
+
+        ${timeAgo(
+          station.observedAt
+        )}
+
+      </div>
+
+
+    </article>
+
+  `;
+
+}
+
+
+
+// ======================================================
+// CAPTAIN REPORTS
+// ======================================================
+
+
+async function loadCaptainReports() {
+
+  const container =
+    document.getElementById(
+      "captainReports"
+    );
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/.netlify/functions/get-captain-reports"
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Reports unavailable"
+      );
+
+    }
+
+
+    const reports =
+      (
+        data.reports || []
+      )
+        .filter(
+          report => {
+
+            const time =
+              report.observation
+                ?.timeObserved ||
+              report.submittedAt;
+
+
+            if (!time) {
+              return false;
+            }
+
+
+            const age =
+              Date.now() -
+              new Date(
+                time
+              )
+                .getTime();
+
+
+            return age <=
+              6 *
+              60 *
+              60 *
+              1000;
+
+          }
+        )
+        .slice(
+          0,
+          5
+        );
+
+
+    if (
+      reports.length === 0
+    ) {
+
+      container.innerHTML = `
+
+        <div class="report">
+
+          No captain reports
+          have been submitted
+          within the last six hours.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      reports
+        .map(
+          report =>
+            renderReport(
+              report
+            )
+        )
+        .join("");
+
+
+  } catch (error) {
+
+    container.innerHTML = `
+
+      <div class="report error">
+
+        Captain reports
+        could not be loaded.
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+
+function renderReport(
+  report
+) {
+
+  const observation =
+    report.observation || {};
+
+
+  const wind =
+    observation.wind || {};
+
+
+  const sea =
+    observation.seaState || {};
+
+
+  const observed =
+    observation.timeObserved ||
+    report.submittedAt;
+
+
+  return `
+
+    <article class="report">
+
+
+      <div class="report-top">
+
+
+        <div>
+
+          <div class="report-captain">
+
+            ${safe(
+              report.captain?.name,
+              "Local operator"
+            )}
+
+          </div>
+
+
+          <div class="report-route">
+
+            ${safe(
+              report.route?.from
+            )}
+
+            →
+
+            ${safe(
+              report.route?.to
+            )}
+
+          </div>
+
+        </div>
+
+
+
+        <div class="report-time">
+
+          ${timeAgo(
+            observed
+          )}
+
+        </div>
+
+
+      </div>
+
+
+
+      <div class="report-details">
+
+        Wind:
+
+        ${safe(
+          wind.direction
+        )}
+
+        ${safe(
+          wind.speedKnots
+        )}
+
+        kt
+
+
+        &nbsp; · &nbsp;
+
+
+        Sea:
+
+        ${safe(
+          sea.category
+        )}
+
+
+        &nbsp; · &nbsp;
+
+
+        Ride:
+
+        ${safe(
+          observation.rideQuality
+        )}
+
+
+        ${
+          observation.notes
+
+            ? `<br><br>
+               ${observation.notes}`
+
+            : ""
+        }
+
+      </div>
+
+
+    </article>
+
+  `;
+
+}
+
+
+
+// ======================================================
+// BRIEFING
+// ======================================================
+
+
+async function loadBriefing() {
+
+  const container =
+    document.getElementById(
+      "briefing"
+    );
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/.netlify/functions/captains-briefing"
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Briefing unavailable"
+      );
+
+    }
+
+
+    const briefing =
+      data.briefing || {};
+
+
+    const analysis =
+      briefing.analysis || [];
+
+
+    const confidence =
+      typeof briefing.confidence ===
+      "object"
+
+        ? briefing.confidence
+
+        : {
+            level:
+              briefing.confidence
+          };
+
+
+    container.innerHTML = `
+
+
+      <div class="assessment">
+
+        ${safe(
+          briefing.assessment,
+          "ASSESSMENT PENDING"
+        )}
+
+      </div>
+
+
+
+      <p>
+
+        <strong>
+          Route:
+        </strong>
+
+        ${safe(
+          briefing.route
+        )}
+
+      </p>
+
+
+
+      ${
+        briefing.forecast
+
+          ? `
+
+            <p>
+
+              <strong>
+                Forecast trend:
+              </strong>
+
+              ${briefing.forecast}
+
+            </p>
+
+          `
+
+          : ""
+      }
+
+
+
+      ${
+        analysis.length
+
+          ? `
+
+            <div>
+
+              ${analysis
+                .map(
+                  item =>
+                    `<p>${item}</p>`
+                )
+                .join("")}
+
+            </div>
+
+          `
+
+          : ""
+      }
+
+
+
+      <div class="confidence">
+
+        <strong>
+          Confidence:
+        </strong>
+
+        ${safe(
+          confidence.level
+        )}
+
+        ${
+          confidence.reason
+
+            ? `<br>
+               ${confidence.reason}`
+
+            : ""
+        }
+
+      </div>
+
+
+    `;
+
+
+  } catch (error) {
+
+    container.innerHTML = `
+
+      <div class="error">
+
+        Captain's Briefing
+        could not be loaded.
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+
+// ======================================================
+// INITIAL LOAD
+// ======================================================
+
+
+async function refreshDashboard() {
+
+  await Promise.all([
+
+    loadStations(),
+
+    loadCaptainReports(),
+
+    loadBriefing()
+
+  ]);
+
+}
+
+
+
+refreshDashboard();
+
+
+
+// Refresh every 5 minutes.
+
+setInterval(
+  refreshDashboard,
+  5 * 60 * 1000
+);
+
+
+</script>
+
+
+</body>
+
+</html>
