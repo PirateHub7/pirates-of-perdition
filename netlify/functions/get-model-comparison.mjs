@@ -4,11 +4,6 @@ export default async () => {
 
     const generatedAt = new Date().toISOString();
 
-
-    // =====================================================
-    // LOCATIONS
-    // =====================================================
-
     const locations = {
 
       sistersIslets: {
@@ -35,10 +30,52 @@ export default async () => {
 
 
     // =====================================================
-    // MODEL DEFINITIONS
-    //
-    // We are deliberately keeping the model data empty
-    // until each official machine-readable source is wired in.
+    // TEST OFFICIAL ECCC GEOMET CONNECTION
+    // =====================================================
+
+    const geometUrl =
+      "https://api.weather.gc.ca/collections?f=json";
+
+    const geometResponse =
+      await fetch(geometUrl);
+
+    if (!geometResponse.ok) {
+      throw new Error(
+        `ECCC GeoMet request failed: ${geometResponse.status}`
+      );
+    }
+
+    const geometData =
+      await geometResponse.json();
+
+
+    // =====================================================
+    // FIND COLLECTIONS THAT APPEAR TO RELATE TO HRDPS
+    // =====================================================
+
+    const allCollections =
+      geometData.collections || [];
+
+    const hrdpsCollections =
+      allCollections
+        .filter(collection => {
+
+          const text =
+            `${collection.id || ""} ${collection.title || ""}`
+              .toLowerCase();
+
+          return text.includes("hrdps");
+
+        })
+        .map(collection => ({
+          id: collection.id,
+          title: collection.title || null,
+          description: collection.description || null
+        }));
+
+
+    // =====================================================
+    // MODELS
     // =====================================================
 
     const models = {
@@ -47,7 +84,11 @@ export default async () => {
         name: "HRDPS",
         source: "Environment and Climate Change Canada",
         resolutionKm: 2.5,
-        status: "pending",
+        status:
+          hrdpsCollections.length > 0
+            ? "source-found"
+            : "source-not-found",
+        availableCollections: hrdpsCollections,
         forecasts: []
       },
 
@@ -75,13 +116,6 @@ export default async () => {
     };
 
 
-    // =====================================================
-    // ACTUAL OBSERVATIONS
-    //
-    // These will eventually be populated from official
-    // station observations and stored historically.
-    // =====================================================
-
     const actualObservations = {
 
       sistersIslets: {
@@ -96,42 +130,6 @@ export default async () => {
 
     };
 
-
-    // =====================================================
-    // MODEL PERFORMANCE
-    //
-    // These values will eventually be calculated from
-    // historical forecast-vs-observed data.
-    // =====================================================
-
-    const modelPerformance = {
-
-      hrdps: {
-        averageWindErrorKnots: null,
-        sampleCount: 0
-      },
-
-      gdps: {
-        averageWindErrorKnots: null,
-        sampleCount: 0
-      },
-
-      gfs: {
-        averageWindErrorKnots: null,
-        sampleCount: 0
-      },
-
-      icon: {
-        averageWindErrorKnots: null,
-        sampleCount: 0
-      }
-
-    };
-
-
-    // =====================================================
-    // RESPONSE
-    // =====================================================
 
     return Response.json({
 
@@ -150,20 +148,18 @@ export default async () => {
 
       actualObservations,
 
-      modelPerformance,
-
-      comparison: {
-        modelAgreement: null,
-        strongestModel: null,
-        weakestModel: null,
-        bestRecentPerformer: null
+      geomet: {
+        connected: true,
+        totalCollections:
+          allCollections.length,
+        hrdpsCollectionsFound:
+          hrdpsCollections.length
       },
 
       notes: [
-        "Only documented machine-readable weather sources will be used.",
-        "Original forecasts will be preserved so later model updates do not overwrite historical predictions.",
-        "Observed station data will be stored separately from forecast data.",
-        "Forecast accuracy will be calculated only after the corresponding observation becomes available."
+        "Connected directly to the official ECCC GeoMet API.",
+        "No forecast values are being invented or scraped.",
+        "The next step is to identify the exact HRDPS 10 metre wind collection and query Sisters Islets."
       ]
 
     });
