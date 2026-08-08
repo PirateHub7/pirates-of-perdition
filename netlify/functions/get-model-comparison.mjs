@@ -2,131 +2,34 @@ export default async () => {
 
   try {
 
-    const generatedAt = new Date().toISOString();
-
     const locations = {
 
       sistersIslets: {
         name: "Sisters Islets",
-        stationCode: "WGT",
         latitude: 49.49,
         longitude: -124.43
       },
 
       ballenasIsland: {
         name: "Ballenas Island",
-        stationCode: "WGB",
         latitude: 49.35,
         longitude: -124.16
-      },
-
-      midStrait: {
-        name: "Mid-Strait",
-        latitude: 49.42,
-        longitude: -124.30
       }
 
     };
 
 
-    // =====================================================
-    // TEST OFFICIAL ECCC GEOMET CONNECTION
-    // =====================================================
+    const hrdps = {
 
-    const geometUrl =
-      "https://api.weather.gc.ca/collections?f=json";
+      sistersIslets:
+        await getHRDPSPoint(
+          locations.sistersIslets
+        ),
 
-    const geometResponse =
-      await fetch(geometUrl);
-
-    if (!geometResponse.ok) {
-      throw new Error(
-        `ECCC GeoMet request failed: ${geometResponse.status}`
-      );
-    }
-
-    const geometData =
-      await geometResponse.json();
-
-
-    // =====================================================
-    // FIND COLLECTIONS THAT APPEAR TO RELATE TO HRDPS
-    // =====================================================
-
-    const allCollections =
-      geometData.collections || [];
-
-    const hrdpsCollections =
-      allCollections
-        .filter(collection => {
-
-          const text =
-            `${collection.id || ""} ${collection.title || ""}`
-              .toLowerCase();
-
-          return text.includes("hrdps");
-
-        })
-        .map(collection => ({
-          id: collection.id,
-          title: collection.title || null,
-          description: collection.description || null
-        }));
-
-
-    // =====================================================
-    // MODELS
-    // =====================================================
-
-    const models = {
-
-      hrdps: {
-        name: "HRDPS",
-        source: "Environment and Climate Change Canada",
-        resolutionKm: 2.5,
-        status:
-          hrdpsCollections.length > 0
-            ? "source-found"
-            : "source-not-found",
-        availableCollections: hrdpsCollections,
-        forecasts: []
-      },
-
-      gdps: {
-        name: "GDPS",
-        source: "Environment and Climate Change Canada",
-        status: "pending",
-        forecasts: []
-      },
-
-      gfs: {
-        name: "GFS",
-        source: "NOAA",
-        status: "pending",
-        forecasts: []
-      },
-
-      icon: {
-        name: "ICON",
-        source: "DWD",
-        status: "pending",
-        forecasts: []
-      }
-
-    };
-
-
-    const actualObservations = {
-
-      sistersIslets: {
-        stationCode: "WGT",
-        observations: []
-      },
-
-      ballenasIsland: {
-        stationCode: "WGB",
-        observations: []
-      }
+      ballenasIsland:
+        await getHRDPSPoint(
+          locations.ballenasIsland
+        )
 
     };
 
@@ -135,39 +38,49 @@ export default async () => {
 
       success: true,
 
-      generatedAt,
+      generatedAt:
+        new Date().toISOString(),
 
       route: {
-        name: "Lasqueti Island ↔ French Creek",
-        region: "Strait of Georgia"
+        name:
+          "Lasqueti Island ↔ French Creek",
+        region:
+          "Strait of Georgia"
       },
 
-      locations,
+      models: {
 
-      models,
+        hrdps: {
 
-      actualObservations,
+          name:
+            "HRDPS",
 
-      geomet: {
-        connected: true,
-        totalCollections:
-          allCollections.length,
-        hrdpsCollectionsFound:
-          hrdpsCollections.length
-      },
+          source:
+            "Environment and Climate Change Canada",
 
-      notes: [
-        "Connected directly to the official ECCC GeoMet API.",
-        "No forecast values are being invented or scraped.",
-        "The next step is to identify the exact HRDPS 10 metre wind collection and query Sisters Islets."
-      ]
+          resolutionKm:
+            2.5,
+
+          status:
+            "live",
+
+          locations:
+            hrdps
+
+        }
+
+      }
 
     });
 
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "HRDPS comparison error:",
+      error
+    );
+
 
     return Response.json(
       {
@@ -181,4 +94,475 @@ export default async () => {
 
   }
 
+};
+
+
+
+// ======================================================
+// HRDPS POINT QUERY
+// ======================================================
+
+async function getHRDPSPoint(
+  location
+) {
+
+  const bboxSize =
+    0.025;
+
+
+  const west =
+    location.longitude -
+    bboxSize;
+
+  const east =
+    location.longitude +
+    bboxSize;
+
+  const south =
+    location.latitude -
+    bboxSize;
+
+  const north =
+    location.latitude +
+    bboxSize;
+
+
+  // --------------------------------------------------
+  // First retrieve layer metadata.
+  // This gives us the current available forecast times.
+  // --------------------------------------------------
+
+  const capabilitiesUrl =
+    "https://geo.weather.gc.ca/geomet" +
+    "?service=WMS" +
+    "&version=1.3.0" +
+    "&request=GetCapabilities" +
+    "&layer=HRDPS.CONTINENTAL_WSPD";
+
+
+  const capabilitiesResponse =
+    await fetch(
+      capabilitiesUrl
+    );
+
+
+  if (
+    !capabilitiesResponse.ok
+  ) {
+
+    throw new Error(
+      `HRDPS capabilities request failed: ${capabilitiesResponse.status}`
+    );
+
+  }
+
+
+  const capabilities =
+    await capabilitiesResponse.text();
+
+
+  // --------------------------------------------------
+  // Find available forecast datetimes.
+  // --------------------------------------------------
+
+  const timeMatch =
+    capabilities.match(
+      /<Dimension[^>]*name=["']time["'][^>]*>([\s\S]*?)<\/Dimension>/i
+    );
+
+
+  if (!timeMatch) {
+
+    return {
+
+      location:
+        location.name,
+
+      available:
+        false,
+
+      reason:
+        "No HRDPS forecast times found."
+
+    };
+
+  }
+
+
+  const times =
+    timeMatch[1]
+      .split(",")
+      .map(
+        item =>
+          item.trim()
+      )
+      .filter(Boolean);
+
+
+  if (
+    times.length === 0
+  ) {
+
+    return {
+
+      location:
+        location.name,
+
+      available:
+        false,
+
+      reason:
+        "No HRDPS forecast times available."
+
+    };
+
+  }
+
+
+  // --------------------------------------------------
+  // Choose nearest forecast time at or after now.
+  // --------------------------------------------------
+
+  const now =
+    Date.now();
+
+
+  let selectedTime =
+    times[0];
+
+
+  for (
+    const time of times
+  ) {
+
+    const timestamp =
+      new Date(
+        time
+      ).getTime();
+
+
+    if (
+      timestamp >= now
+    ) {
+
+      selectedTime =
+        time;
+
+      break;
+
+    }
+
+  }
+
+
+  // --------------------------------------------------
+  // Query wind speed.
+  // --------------------------------------------------
+
+  const windSpeed =
+    await getFeatureValue({
+
+      layer:
+        "HRDPS.CONTINENTAL_WSPD",
+
+      time:
+        selectedTime,
+
+      west,
+      south,
+      east,
+      north
+
+    });
+
+
+  // --------------------------------------------------
+  // Query wind direction.
+  // --------------------------------------------------
+
+  const windDirection =
+    await getFeatureValue({
+
+      layer:
+        "HRDPS.CONTINENTAL_WD",
+
+      time:
+        selectedTime,
+
+      west,
+      south,
+      east,
+      north
+
+    });
+
+
+  // --------------------------------------------------
+  // Query maximum gust.
+  // --------------------------------------------------
+
+  const gust =
+    await getFeatureValue({
+
+      layer:
+        "HRDPS.CONTINENTAL_WGX",
+
+      time:
+        selectedTime,
+
+      west,
+      south,
+      east,
+      north
+
+    });
+
+
+  return {
+
+    location:
+      location.name,
+
+    available:
+      true,
+
+    forecastFor:
+      selectedTime,
+
+    wind: {
+
+      speedKnots:
+        msToKnots(
+          windSpeed
+        ),
+
+      directionDegrees:
+        windDirection,
+
+      directionCardinal:
+        degreesToCardinal(
+          windDirection
+        ),
+
+      gustKnots:
+        msToKnots(
+          gust
+        )
+
+    }
+
+  };
+
 }
+
+
+
+// ======================================================
+// WMS FEATURE INFO
+// ======================================================
+
+async function getFeatureValue({
+  layer,
+  time,
+  west,
+  south,
+  east,
+  north
+}) {
+
+  const params =
+    new URLSearchParams({
+
+      SERVICE:
+        "WMS",
+
+      VERSION:
+        "1.3.0",
+
+      REQUEST:
+        "GetFeatureInfo",
+
+      LAYERS:
+        layer,
+
+      QUERY_LAYERS:
+        layer,
+
+      CRS:
+        "EPSG:4326",
+
+      BBOX:
+        `${south},${west},${north},${east}`,
+
+      WIDTH:
+        "101",
+
+      HEIGHT:
+        "101",
+
+      I:
+        "50",
+
+      J:
+        "50",
+
+      INFO_FORMAT:
+        "application/json",
+
+      TIME:
+        time
+
+    });
+
+
+  const url =
+    "https://geo.weather.gc.ca/geomet?" +
+    params.toString();
+
+
+  const response =
+    await fetch(
+      url
+    );
+
+
+  if (!response.ok) {
+
+    return null;
+
+  }
+
+
+  const data =
+    await response.json();
+
+
+  const feature =
+    data.features?.[0];
+
+
+  if (!feature) {
+
+    return null;
+
+  }
+
+
+  const props =
+    feature.properties || {};
+
+
+  // GeoMet normally returns the layer value
+  // as one numeric property. Find the first number.
+
+  for (
+    const value of
+    Object.values(props)
+  ) {
+
+    if (
+      typeof value ===
+      "number"
+    ) {
+
+      return value;
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+
+// ======================================================
+// HELPERS
+// ======================================================
+
+function msToKnots(
+  value
+) {
+
+  if (
+    value === null ||
+    value === undefined ||
+    Number.isNaN(
+      Number(value)
+    )
+  ) {
+
+    return null;
+
+  }
+
+
+  return Number(
+    (
+      Number(value) *
+      1.94384
+    ).toFixed(1)
+  );
+
+}
+
+
+
+function degreesToCardinal(
+  degrees
+) {
+
+  if (
+    degrees === null ||
+    degrees === undefined ||
+    Number.isNaN(
+      Number(degrees)
+    )
+  ) {
+
+    return null;
+
+  }
+
+
+  const directions = [
+    "N",
+    "NNE",
+    "NE",
+    "ENE",
+    "E",
+    "ESE",
+    "SE",
+    "SSE",
+    "S",
+    "SSW",
+    "SW",
+    "WSW",
+    "W",
+    "WNW",
+    "NW",
+    "NNW"
+  ];
+
+
+  const normalized =
+    (
+      Number(degrees) %
+      360 +
+      360
+    ) % 360;
+
+
+  const index =
+    Math.round(
+      normalized /
+      22.5
+    ) % 16;
+
+
+  return directions[index];
+
+}
+    
