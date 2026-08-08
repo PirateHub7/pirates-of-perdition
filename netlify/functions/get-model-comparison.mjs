@@ -371,48 +371,54 @@ async function getFeatureValue({
 }) {
 
   const params =
-    new URLSearchParams({
+  new URLSearchParams({
 
-      SERVICE:
-        "WMS",
+    SERVICE:
+      "WMS",
 
-      VERSION:
-        "1.3.0",
+    VERSION:
+      "1.3.0",
 
-      REQUEST:
-        "GetFeatureInfo",
+    REQUEST:
+      "GetFeatureInfo",
 
-      LAYERS:
-        layer,
+    LAYERS:
+      layer,
 
-      QUERY_LAYERS:
-        layer,
+    QUERY_LAYERS:
+      layer,
 
-      CRS:
-        "EPSG:4326",
+    CRS:
+      "EPSG:4326",
 
-      BBOX:
-        `${south},${west},${north},${east}`,
+    BBOX:
+      `${south},${west},${north},${east}`,
 
-      WIDTH:
-        "101",
+    WIDTH:
+      "101",
 
-      HEIGHT:
-        "101",
+    HEIGHT:
+      "101",
 
-      I:
-        "50",
+    I:
+      "50",
 
-      J:
-        "50",
+    J:
+      "50",
 
-      INFO_FORMAT:
-        "application/json",
+    FORMAT:
+      "image/png",
 
-      TIME:
-        time
+    INFO_FORMAT:
+      "application/json",
 
-    });
+    FEATURE_COUNT:
+      "1",
+
+    TIME:
+      time
+
+  });
 
 
   const url =
@@ -433,8 +439,26 @@ async function getFeatureValue({
   }
 
 
-  const data =
-    await response.json();
+  const text =
+  await response.text();
+
+
+if (
+  text.trim().startsWith("<")
+) {
+
+  console.error(
+    `GeoMet XML response for ${layer}:`,
+    text.slice(0, 1000)
+  );
+
+  return null;
+
+}
+
+
+const data =
+  JSON.parse(text);
 
 
   const feature =
@@ -455,24 +479,30 @@ async function getFeatureValue({
   // GeoMet normally returns the layer value
   // as one numeric property. Find the first number.
 
-  for (
-    const value of
-    Object.values(props)
-  ) {
+  if (
+  typeof props.value === "number"
+) {
 
-    if (
-      typeof value ===
-      "number"
-    ) {
+  return props.value;
 
-      return value;
-
-    }
-
-  }
+}
 
 
-  return null;
+if (
+  props.value !== undefined &&
+  !Number.isNaN(
+    Number(props.value)
+  )
+) {
+
+  return Number(
+    props.value
+  );
+
+}
+
+
+return null;
 
 }
 
