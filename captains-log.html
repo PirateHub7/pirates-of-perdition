@@ -1085,19 +1085,66 @@ form.addEventListener(
     };
 
 
-    console.log(
-      "Captain's Log:",
-      log
+    try {
+
+  statusBox.style.display = "block";
+
+  statusBox.innerHTML =
+    "Saving Captain's Log...";
+
+
+  const response = await fetch(
+    "/.netlify/functions/submit-captains-log",
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify(log)
+    }
+  );
+
+
+  const result =
+    await response.json();
+
+
+  if (
+    !response.ok ||
+    !result.success
+  ) {
+
+    throw new Error(
+      result.error ||
+      "Log submission failed."
     );
 
+  }
 
-    statusBox.style.display =
-      "block";
 
-    statusBox.innerHTML = `
-      <strong>Captain's Log prepared successfully.</strong><br>
-      Storage has not been connected yet.
-    `;
+  statusBox.innerHTML = `
+    <strong>Captain's Log saved successfully.</strong><br>
+    Log ID: ${result.logId}
+  `;
+
+
+  form.reset();
+
+
+} catch (error) {
+
+  statusBox.style.display =
+    "block";
+
+
+  statusBox.innerHTML = `
+    <strong>Captain's Log could not be saved.</strong><br>
+    ${error.message}
+  `;
+
+}
 
   }
 );
