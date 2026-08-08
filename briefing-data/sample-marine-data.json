@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-08-07T14:00:00-07:00",
+  "route": {
+    "name": "Lasqueti Island ↔ French Creek",
+    "region": "Strait of Georgia"
+  },
+  "observations": [
+    {
+      "station": "Sisters Islets",
+      "windDirection": "NW",
+      "windSpeedKnots": 12,
+      "gustKnots": 16,
+      "trend": "easing"
+    },
+    {
+      "station": "Ballenas Island",
+      "windDirection": "NW",
+      "windSpeedKnots": 9,
+      "gustKnots": 12,
+      "trend": "steady"
+    }
+  ],
+  "forecast": {
+    "summary": "Northwest winds diminishing through the afternoon.",
+    "nextPeriod": "Light winds expected this evening."
+  },
+  "marineFactors": {
+    "visibility": "Good",
+    "precipitation": "None",
+    "seaState": "Moderate chop",
+    "tideStage": "Falling"
+  }
+}
